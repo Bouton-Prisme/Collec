@@ -1,0 +1,91 @@
+{
+    "products": {
+        "2": {
+            "name": "Bronze Pack",
+            "usd": 9,
+            "sort_order": 2,
+            "badge": "Essentials",
+            "description": "30 digital illustrations covering abstract shapes and soft textures. A compact collection for refreshing your screens and personal projects.",
+            "tagline": "30 illustrations · Abstracts + textures · Personal use",
+            "media": [
+                {
+                    "src": "media/packs/Pack2.png",
+                    "alt": "Bronze Pack image"
+                }
+            ]
+        },
+        "3": {
+            "name": "Silver Pack",
+            "usd": 15,
+            "sort_order": 3,
+            "badge": "Collection",
+            "description": "60 digital illustrations with dreamlike landscapes, botanical scenes and abstract art. Includes desktop and mobile formats.",
+            "tagline": "60 illustrations · Desktop + mobile · Personal use",
+            "media": [
+                {
+                    "src": "media/packs/Pack3.png",
+                    "alt": "Silver Pack image"
+                }
+            ]
+        },
+        "4": {
+            "name": "Gold Pack",
+            "usd": 25,
+            "sort_order": 4,
+            "badge": "Extended",
+            "description": "120 digital illustrations organised by theme, with desktop and mobile wallpapers. Includes a visual contact sheet to browse the collection.",
+            "tagline": "120 illustrations · Themed folders · Contact sheet",
+            "media": [
+                {
+                    "src": "media/packs/Pack4.png",
+                    "alt": "Gold Pack image"
+                }
+            ]
+        },
+        "5": {
+            "name": "Ruby Pack",
+            "usd": 49,
+            "sort_order": 5,
+            "badge": "Premium",
+            "description": "250 digital illustrations across landscapes, flowers and experimental artwork. Includes colour variations and a visual index for easy browsing.",
+            "tagline": "250 illustrations · Colour variations · Visual index",
+            "media": [
+                {
+                    "src": "media/packs/Pack5.png",
+                    "alt": "Ruby Pack image"
+                }
+            ]
+        },
+        "6": {
+            "name": "Diamond Pack",
+            "usd": 75,
+            "sort_order": 6,
+            "badge": "Complete",
+            "description": "500 digital illustrations in one curated archive. Includes all five smaller collections, desktop and mobile formats, and a complete visual index.",
+            "tagline": "500 illustrations · Complete archive · Personal use",
+            "media": [
+                {
+                    "src": "media/packs/Pack6.png",
+                    "alt": "Diamond Pack image"
+                }
+            ]
+        },
+        "7": {
+            "name": "Starter Pack",
+            "usd": 5,
+            "sort_order": 1,
+            "badge": "Discovery",
+            "description": "12 digital illustrations in a colourful starter collection. PNG and JPG files for personal wallpapers and moodboards.",
+            "tagline": "12 illustrations · PNG + JPG · Personal use",
+            "media": [
+                {
+                    "src": "media/packs/Pack1.png",
+                    "alt": "Starter Pack image"
+                }
+            ]
+        }
+    },
+    "roulette": {
+        "media": []
+    }
+}

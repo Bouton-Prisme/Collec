@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en" class="dark" data-zoom="80">
+
+<style>
+  :root { --bg: #0b0c10; }
+
+  html, body { height: 100%; }
+  body{
+    margin:0;
+    background:
+      radial-gradient(140vw 90vh at 50% -10%, rgba(82, 101, 189, 0.14), transparent 70%),
+      radial-gradient(110vw 70vh at 80% 10%, rgba(56,189,248,.10), transparent 60%),
+      linear-gradient(var(--bg), var(--bg));
+    background-repeat: no-repeat;
+    background-attachment: fixed, fixed, fixed;
+    background-color: var(--bg);
+  }
+</style>
+
+<head>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { darkMode: 'class' }
+  </script>
+
+  <style id="ui-zoom">
+    html { font-size: 16px; }              /* 100%  */
+    html[data-zoom="90"]  { font-size: 14.4px; } /* ~90% */
+    html[data-zoom="80"]  { font-size: 12.8px; } /* ~80% */
+    html[data-zoom="75"]  { font-size: 11.8px; } /* ~75% */
+  </style>
+
+
+<style>
+  .product-carousel {
+    cursor: pointer;
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+  .product-carousel [data-carousel-inner] {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+  .carousel-slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .5s ease, transform .6s ease;
+  }
+  .carousel-slide.is-active {
+    opacity: 1;
+    pointer-events: auto;
+    cursor: pointer;
+  }
+  .carousel-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transform: scale(1);
+  }
+  .carousel-slide::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: .5;
+    mix-blend-mode: soft-light;
+    pointer-events: none;
+    transition: opacity .6s ease;
+  }
+  .carousel-slide.is-active::after {
+    opacity: .35;
+  }
+  .carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 64px;             /* bigger clickable area */
+    height: 64px;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    font-size: 1.1rem;
+    transition: background .25s ease, transform .25s ease;
+  }
+
+  .carousel-btn img {
+    width: 24px;             /* keep arrow size fixed */
+    height: auto;
+  }
+
+  .carousel-btn.prev { left: -20px; height:0px; opacity: .75 }
+  .carousel-btn.next { right: -20px; height:0px; opacity: .75}
+
+  .carousel-btn.prev:hover,
+  .carousel-btn.next:hover {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+
+  .product-carousel[data-multi="false"] .carousel-btn,
+  .product-carousel[data-multi="false"] .carousel-dots {
+    display: none;
+  }
+  .carousel-dots {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+  }
+  .carousel-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.35);
+    border: none;
+    padding: 0;
+    transition: transform .25s ease, background .25s ease;
+  }
+  .carousel-dot.is-active {
+    background: rgba(226, 232, 233, 0.9);
+    transform: scale(1.2);
+  }
+  body.modal-open {
+    overflow: hidden;
+  }
+  .carousel-modal {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity .3s ease, visibility .3s ease;
+    z-index: 9999;
+  }
+  .carousel-modal.is-active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+  .carousel-modal__dialog {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .carousel-modal__media {
+    position:sticky;
+    padding-top: min(62%, 70vh);
+    height: 800px;
+
+  }
+  .carousel-modal__media img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+
+  }
+  .carousel-modal__close {
+    opacity: .75;
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 38px;
+    height: 38px;
+    color: #fff;
+    font-size: 1.25rem;
+    line-height: 1;
+    display: grid;
+    place-items: center;
+    transition: background .2s ease, transform .2s ease;
+    z-index: 2;
+  }
+  .carousel-modal__close:hover {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  .carousel-modal__nav {
+    position: absolute;
+    opacity: .75;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 50px;
+    height: 50px;
+    font-size: 1.4rem;
+    display: grid;
+    place-items: center;
+    transition: background .2s ease, transform .2s ease;
+    z-index: 1;
+  }
+  .carousel-modal__nav:hover {
+    opacity: 1;
+    transform: translateY(-50%) scale(1.1);
+  }
+
+  .carousel-modal__nav--prev {
+    left: 12px;
+  }
+  .carousel-modal__nav--next {
+    right: 12px;
+  }
+  .carousel-modal__details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 22px 20px;
+
+  }
+  .carousel-modal__caption {
+    font-size: .95rem;
+    color: rgba(226,232,240,.88);
+  }
+  .carousel-modal__counter {
+    font-size: .85rem;
+    color: rgba(148,163,184,.9);
+    letter-spacing: .08em;
+  }
+  @media (max-width: 640px) {
+    .carousel-modal {
+      padding: 12px;
+    }
+    .carousel-modal__nav {
+      width: 36px;
+      height: 36px;
+      font-size: 1.1rem;
+    }
+    .carousel-modal__details {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .carousel-modal__counter {
+      align-self: flex-end;
+    }
+  }
+  .amount-price {
+    font-size: .875rem;
+    font-weight: 600;
+    background: rgba(110,231,255,.14);
+    color: rgb(110,231,255);
+    padding: 6px 12px;
+    border-radius: 999px;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .amount-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: .7rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(167,139,250,.16);
+    color: rgb(167,139,250);
+  }
+  .amount-badge.hidden { display: none; }
+</style>
+
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shop - Crypto Checkout</title>
+
+  <style>
+    [data-product-card] {
+      transition: transform .05s cubic-bezier(.23,1,.32,1), box-shadow .45s cubic-bezier(.23,1,.32,1), background-color .45s ease, border-color .45s ease;
+      transform: translateY(0);
+
+    }
+
+    [data-product-card]:hover {
+      transform: translateY(-1px);
+      background: radial-gradient(circle, rgb(21, 33, 49) 0%, rgba(252, 70, 107, .0) 80%);
+      box-shadow: 0 32px 58px rgba(116, 158, 255, 0.1);
+    }
+  </style>
+
+</head>
+
+<body class="min-h-screen flex flex-col bg-white text-black transition-colors dark:bg-black dark:text-white">
+  <header>
+    <nav class="flex justify-between items-center px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
+      <div class="font-bold text-white text-lg mt-1">BitShop</div>
+      <div class="flex items-center gap-3">
+        <a href="roulette.html" class="px-4 py-2 border border-white rounded text-sm">Roulette</a>
+        <a href="admin.php"
+          class="px-4 py-2 text-white border border-white rounded text-sm hover:bg-white hover:text-black inline-block">
+          Admin
+        </a>
+      </div>
+    </nav>
+  </header>
+
+
+
+
+  <main class="flex-1 text-center pt-16 px-4 pb-0">
+
+
+
+    <p data-demo-notice class="mb-6 text-sm text-cyan-300">Demo catalogue — sample products, no real purchase or delivery.</p>
+    <h1 class="text-3xl font-bold">Select your product.</h1>
+    <p class="text-gray-600 dark:text-gray-500 text-lg mb-12">Choose a pack. Pay with crypto.</p>
+
+
+
+
+      <div class="relative inline-flex items-center group">
+        <!-- Déclencheur -->
+        <button type="button" aria-describedby="tip-howitworks"
+        class="px-4 py-2 text-white border border-white rounded text-sm hover:bg-gray-800 hover:text-white inline-block"> 💡 How it works ?
+        </button>
+
+        <!-- Bulle -->
+        <div id="tip-howitworks" role="tooltip"
+          class="pointer-events-none absolute left-1/2
+                top-full w-[90vw] max-w-md -translate-x-1/2 mt-2
+                opacity-0 scale-95 transition duration-150 ease-out
+                group-hover:opacity-100 group-hover:scale-100
+                group-focus-within:opacity-100 group-focus-within:scale-100 z-50">
+
+
+          <!-- Contenu de la bulle -->
+          <div class="max-w-md w-[100%] rounded-2xl border border-white/10 bg-[#111825] text-white text-sm shadow-2xl p-5 relative text-center">
+      <div class="absolute text-[12px] leading-none px-1.5 py-0.5 rounded-full bg-[#0b0c10] text-gray-300 items-center">
+        1
+      </div>
+              <p class="text-sm italic text-gray-300 leading-relaxed mb-6">
+                  Pick the product that suits you best <br>
+                </p>
+      <div class="absolute text-[12px] leading-none px-1.5 py-0.5 rounded-full bg-[#0b0c10] text-gray-300  items-center">
+        2
+      </div>
+                <p class="ml-12 text-sm italic text-gray-300 leading-relaxed mb-6">
+                  Select your favorite crypto currency, <b>scan the QR code</b>  or <b>copy the address</b> in your wallet.<br>
+                </p>
+      <div class="absolute text-[12px] leading-none px-1.5 py-0.5 rounded-full bg-[#0b0c10] text-gray-300  items-center">
+        3
+      </div>
+                <p class="ml-10 text-sm italic text-gray-300 leading-relaxed mb-6">
+                  Once the transaction is done, <b>send your proof</b> (screenshot or TXID) to: <span data-support-email>Loading support contact?</span><br>
+                </p>
+      <div class="absolute text-[12px] leading-none px-1.5 py-0.5 rounded-full bg-[#0b0c10] text-gray-300 items-center">
+        4
+      </div>
+                <p class="ml-10 text-sm italic text-gray-300 leading-relaxed">
+                  You’ll receive your <b>download link</b> within 24 hours.<br>
+                  No account, no tracking.<br>
+                </p>
+            </p>
+          </div>
+        </div>
+      </div>
+
+<!-- Products -->
+    <section class="sm:mt-2 grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-6xl mx-auto pt-40" data-products-grid>
+      <!-- Product 1 -->
+      <div class="p-6 border rounded-lg text-left border-gray-200 dark:border-gray-700 min-h-[350px] flex flex-col" data-product-card="1">
+        <div class="w-full h-72 sm:h-80 mb-4 overflow-hidden">
+          <div class="product-carousel w-full h-full" data-carousel="1">
+            <div class="w-full h-full" data-carousel-inner></div>
+
+              <button type="button" class="carousel-btn prev p-3" data-carousel-prev aria-label="Previous image">
+                <img src="flcg.png" alt="Previous" />
+              </button>
+              <button type="button" class="carousel-btn next p-3" data-carousel-next aria-label="Next image">
+                <img src="flcd.png" alt="Next" />
+              </button>
+
+            <div class="carousel-dots" data-carousel-dots></div>
+          </div>
+        </div>
+        <h2 class="text-center font-semibold text-lg">Product 1</h2>
+        <p class="text-center text-sm text-gray-500 dark:text-gray-400 mb-4">Description produit 1 Description produit 1 Description produit 1 <br>
+        Description produit 1Description produit 1Description produit 1Description produit </p>
+        <div class="mt-auto text-center">
+          <a href="payment.html?value=1"
+            class="mt-2 px-4 py-2 text-white font-bold rounded-lg
+                    bg-cyan-950 text-white border border-sky-700
+                    hover:opacity-90 transition">
+            Select
+          </a>
+        </div>
+      </div>
+
+      <!-- Product 2 -->
+      <div class="p-6 border rounded-lg text-left border-gray-200 dark:border-gray-700 min-h-[350px] flex flex-col" data-product-card="2">
+        <div class="w-full h-72 sm:h-80 mb-4 overflow-hidden">
+          <div class="product-carousel w-full h-full" data-carousel="2">
+            <div class="w-full h-full" data-carousel-inner></div>
+              <button type="button" class="carousel-btn prev p-3" data-carousel-prev aria-label="Previous image">
+                <img src="flcg.png" alt="Previous" />
+              </button>
+              <button type="button" class="carousel-btn next p-3" data-carousel-next aria-label="Next image">
+                <img src="flcd.png" alt="Next" />
+              </button>
+
+            <div class="carousel-dots" data-carousel-dots></div>
+          </div>
+        </div>
+        <h2 class="text-center font-semibold text-lg">Product 2</h2>
+        <p class="text-center text-sm text-gray-500 dark:text-gray-400 mb-4">Descrptionqs dqsdqs qsqs qqsqs q qs qs qsdqsdqsdqsdqsdq sdqsdqsd q sdqsd qsdqsdqsdqsdqsdqsdqsd 2Descrption produit 2Descrption produit 2Descrption produit 2Descrption produit 2</p>
+        <div class="mt-auto text-center">
+          <a href="payment.html?value=2"
+            class="mt-2 px-4 py-2 text-white font-bold rounded-lg
+                    bg-cyan-950 text-white border border-sky-700
+                    hover:opacity-90 transition">
+            Select
+          </a>
+        </div>
+      </div>
+
+      <!-- Product 3 -->
+      <div class="p-6 border rounded-lg text-left border-gray-200 dark:border-gray-700 min-h-[350px] flex flex-col" data-product-card="3">
+        <div class="w-full h-72 sm:h-80 mb-4 overflow-hidden">
+          <div class="product-carousel w-full h-full" data-carousel="3">
+            <div class="w-full h-full" data-carousel-inner></div>
+              <button type="button" class="carousel-btn prev p-3" data-carousel-prev aria-label="Previous image">
+                <img src="flcg.png" alt="Previous" />
+              </button>
+              <button type="button" class="carousel-btn next p-3" data-carousel-next aria-label="Next image">
+                <img src="flcd.png" alt="Next" />
+              </button>
+
+            <div class="carousel-dots" data-carousel-dots></div>
+          </div>
+        </div>
+        <h2 class="text-center font-semibold text-lg">Product 3</h2>
+        <p class="text-center text-sm text-gray-500 dark:text-gray-400 mb-4">Descrption produit 3<br>
+        Descrption produit 3 <br>Descrption produit 3Descrption produit 3Descrption produit 3</p>
+        <div class="mt-auto text-center">
+          <a href="payment.html?value=3"
+            class="mt-2 px-4 py-2 text-white font-bold rounded-lg
+                    bg-cyan-950 text-white border border-sky-700
+                    hover:opacity-90 transition">
+            Select
+          </a>
+        </div>
+      </div>
+
+      <!-- Product 4 -->
+      <div class="p-6 border rounded-lg text-left border-gray-200 dark:border-gray-700 min-h-[350px] flex flex-col" data-product-card="4">
+        <div class="w-full h-72 sm:h-80 mb-4 overflow-hidden">
+          <div class="product-carousel w-full h-full" data-carousel="4">
+            <div class="w-full h-full" data-carousel-inner></div>
+              <button type="button" class="carousel-btn prev p-3" data-carousel-prev aria-label="Previous image">
+                <img src="flcg.png" alt="Previous" />
+              </button>
+              <button type="button" class="carousel-btn next p-3" data-carousel-next aria-label="Next image">
+                <img src="flcd.png" alt="Next" />
+              </button>
+
+            <div class="carousel-dots" data-carousel-dots></div>
+          </div>
+        </div>
+        <h2 class="text-center font-semibold text-lg">Product 4</h2>
+        <p class="text-center text-sm text-gray-500 dark:text-gray-400 mb-4">Description produit 1 Description produit 1 Description produit 1 <br>
+        Description produit 1Description produit 1Description produit 1Description produit </p>
+        <div class="mt-auto text-center">
+          <a href="payment.html?value=4"
+            class="mt-2 px-4 py-2 text-white font-bold rounded-lg
+                    bg-cyan-950 text-white border border-sky-700
+                    hover:opacity-90 transition">
+            Select
+          </a>
+        </div>
+      </div>
+
+      <!-- Product 5 -->
+      <div class="p-6 border rounded-lg text-left border-gray-200 dark:border-gray-700 min-h-[350px] flex flex-col" data-product-card="5">
+        <div class="w-full h-72 sm:h-80 mb-4 overflow-hidden">
+          <div class="product-carousel w-full h-full" data-carousel="5">
+            <div class="w-full h-full" data-carousel-inner></div>
+              <button type="button" class="carousel-btn prev p-3" data-carousel-prev aria-label="Previous image">
+                <img src="flcg.png" alt="Previous" />
+              </button>
+              <button type="button" class="carousel-btn next p-3" data-carousel-next aria-label="Next image">
+                <img src="flcd.png" alt="Next" />
+              </button>
+
+            <div class="carousel-dots" data-carousel-dots></div>
+          </div>
+        </div>
+        <h2 class="text-center font-semibold text-lg">Product 5</h2>
+        <p class="text-center text-sm text-gray-500 dark:text-gray-400 mb-4">Descrptionqs dqsdqs qsqs qqsqs q qs qs qsdqsdqsdqsdqsdq sdqsdqsd q sdqsd qsdqsdqsdqsdqsdqsdqsd 2Descrption produit 2Descrption produit 2Descrption produit 2Descrption produit 2</p>
+        <div class="mt-auto text-center">
+          <a href="payment.html?value=5"
+            class="mt-2 px-4 py-2 text-white font-bold rounded-lg
+                    bg-cyan-950 text-white border border-sky-700
+                    hover:opacity-90 transition">
+            Select
+          </a>
+        </div>
+      </div>
+
+      <!-- Product 6 -->
+      <div class="p-6 border rounded-lg text-left border-gray-200 dark:border-gray-700 min-h-[350px] flex flex-col" data-product-card="6">
+        <div class="w-full h-72 sm:h-80 mb-4 overflow-hidden">
+          <div class="product-carousel w-full h-full" data-carousel="6">
+            <div class="w-full h-full" data-carousel-inner></div>
+              <button type="button" class="carousel-btn prev p-3" data-carousel-prev aria-label="Previous image">
+                <img src="flcg.png" alt="Previous" />
+              </button>
+              <button type="button" class="carousel-btn next p-3" data-carousel-next aria-label="Next image">
+                <img src="flcd.png" alt="Next" />
+              </button>
+
+            <div class="carousel-dots" data-carousel-dots></div>
+          </div>
+        </div>
+        <h2 class="text-center font-semibold text-lg">Product 6</h2>
+        <p class="text-center text-sm text-gray-500 dark:text-gray-400 mb-4">Descrption produit 3<br>
+        Descrption produit 3 <br>Descrption produit 3Descrption produit 3Descrption produit 3</p>
+        <div class="mt-auto text-center">
+          <a href="payment.html?value=6"
+            class="mt-2 px-4 py-2 text-white font-bold rounded-lg
+                    bg-cyan-950 text-white border border-sky-700
+                    hover:opacity-90 transition">
+            Select
+          </a>
+        </div>
+      </div>
+
+
+
+    </section>
+
+
+
+
+
+
+
+
+
+
+
+
+    <!-- Why crypto -->
+    <section class="mt-32 px-4 py-16 text-center">
+      <h2 class="text-3xl font-bold">Why crypto?</h2>
+      <div class="mt-8 max-w-3xl mx-auto flex flex-wrap justify-center gap-2">
+        <span class="px-3 py-1 rounded-full border border-gray-300 dark:border-gray-700 text-sm">Reduced fees</span>
+        <span class="px-3 py-1 rounded-full border border-gray-300 dark:border-gray-700 text-sm">Minutes to confirm</span>
+        <span class="px-3 py-1 rounded-full border border-gray-300 dark:border-gray-700 text-sm">No chargebacks</span>
+        <span class="px-3 py-1 rounded-full border border-gray-300 dark:border-gray-700 text-sm">No bank data shared</span>
+        <span class="px-3 py-1 rounded-full border border-gray-300 dark:border-gray-700 text-sm">Verifiable receipts</span>
+        <span class="px-3 py-1 rounded-full border border-gray-300 dark:border-gray-700 text-sm">Full privacy option (XMR)</span>
+      </div>
+    </section>
+  </main>
+
+  <footer class="flex flex-col sm:flex-row justify-between text-xs text-gray-400 dark:text-gray-500 px-6 py-8 border-t border-gray-200 dark:border-gray-700">
+    <div>© 2025 BitShop</div>
+    <div class="flex gap-6 mt-2 sm:mt-0">
+      <a href="support.html">Support</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html">Terms</a>
+    </div>
+  </footer>
+
+  <div class="carousel-modal" data-carousel-modal>
+    <div class="carousel-modal__dialog">
+      <button type="button" class="carousel-modal__close" data-modal-close aria-label="Close image">🗙</button>
+
+      <div class="carousel-modal__media">
+        <img src="" alt="" data-modal-image>
+        <button type="button" class="carousel-modal__nav carousel-modal__nav--prev" data-modal-prev aria-label="Previous image"><img src="flcg.png" alt="Previous" /></button>
+        <button type="button" class="carousel-modal__nav carousel-modal__nav--next" data-modal-next aria-label="Next image"><img src="flcd.png" alt="Next" /></button>
+
+      </div>
+      <div class="carousel-modal__details">
+        <p class="carousel-modal__caption" data-modal-caption></p>
+        <span class="carousel-modal__counter" data-modal-counter></span>
+      </div>
+    </div>
+  </div>
+
+
+
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    let PRODUCTS = {};
+    let PRODUCT_MEDIA = {};
+    try {
+      const response = await fetch(`products.json?v=${Date.now()}`, { cache: 'no-store' });
+      if (!response.ok) throw new Error('Catalogue unavailable');
+      const config = await response.json();
+      if (!config.products || typeof config.products !== 'object') throw new Error('Invalid catalogue');
+      PRODUCTS = config.products;
+      Object.entries(PRODUCTS).forEach(([id, product]) => {
+        PRODUCT_MEDIA[id] = Array.isArray(product.media) ? product.media : [];
+      });
+      try {
+        const settingsResponse = await fetch('payment-config.php', { cache: 'no-store' });
+        if (!settingsResponse.ok) throw new Error('Payment settings unavailable');
+        const settings = await settingsResponse.json();
+        const notice = document.querySelector('[data-demo-notice]');
+        notice.hidden = settings.mode !== 'demo' && settings.enabled;
+        if (!settings.enabled) notice.textContent = 'Payments are temporarily unavailable. Browse the catalogue and contact support for help.';
+      } catch {
+        document.querySelector('[data-demo-notice]').textContent = 'Payment settings are temporarily unavailable.';
+      }
+    } catch (error) {
+      document.querySelector('[data-products-grid]').textContent = 'The catalogue could not be loaded. Please refresh the page.';
+      return;
+    }
+
+    const productEntries = Object.entries(PRODUCTS).sort(([a, pa], [b, pb]) => {
+      const order = (id, product) => Number.isInteger(product.sort_order) && product.sort_order > 0 ? product.sort_order : Number(id);
+      return order(a, pa) - order(b, pb) || Number(a) - Number(b);
+    });
+    const productsGrid = document.querySelector('[data-products-grid]');
+
+    const escapeHTML = (value) => String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+
+    const renderProductsGrid = () => {
+      if (!productsGrid) return;
+
+      if (!productEntries.length) { productsGrid.textContent = 'No products are available yet.'; return; }
+      productsGrid.innerHTML = productEntries.map(([id, product]) => {
+        const price = typeof product.usd === 'number' ? `$${product.usd}` : '--';
+        const hasBadge = Boolean(product.badge);
+
+        return `
+          <div class="p-6 border rounded-lg text-left border-gray-200 dark:border-gray-700 min-h-[350px] flex flex-col" data-product-card="${escapeHTML(id)}">
+            <div class="w-full h-72 sm:h-80 mb-4 overflow-hidden">
+              <div class="product-carousel w-full h-full" data-carousel="${escapeHTML(id)}">
+                <div class="w-full h-full" data-carousel-inner></div>
+                <button type="button" class="carousel-btn prev p-3" data-carousel-prev aria-label="Previous image">
+                  <img src="flcg.png" alt="Previous" />
+                </button>
+                <button type="button" class="carousel-btn next p-3" data-carousel-next aria-label="Next image">
+                  <img src="flcd.png" alt="Next" />
+                </button>
+                <div class="carousel-dots" data-carousel-dots></div>
+              </div>
+            </div>
+            <div class="mb-3 flex items-center justify-center gap-2">
+              <span class="amount-badge ${hasBadge ? '' : 'hidden'}" data-product-badge>${escapeHTML(product.badge || '')}</span>
+              <span class="amount-price" data-product-price>${escapeHTML(price)}</span>
+            </div>
+            <h2 class="text-center font-semibold text-lg">${escapeHTML(product.name || `Product ${id}`)}</h2>
+            <p class="text-center text-sm text-gray-500 dark:text-gray-400 mb-4" data-product-description>${escapeHTML(product.description || product.tagline || '')}</p>
+            <div class="mt-auto text-center">
+              <a href="payment.html?value=${encodeURIComponent(id)}"
+                class="mt-2 px-4 py-2 text-white font-bold rounded-lg
+                        bg-cyan-950 text-white border border-sky-700
+                        hover:opacity-90 transition">
+                Select
+              </a>
+            </div>
+          </div>
+        `;
+      }).join('');
+    };
+
+    renderProductsGrid();
+
+    const modal = document.querySelector('[data-carousel-modal]');
+    const modalImage = modal?.querySelector('[data-modal-image]');
+    const modalCaption = modal?.querySelector('[data-modal-caption]');
+    const modalCounter = modal?.querySelector('[data-modal-counter]');
+    const modalPrev = modal?.querySelector('[data-modal-prev]');
+    const modalNext = modal?.querySelector('[data-modal-next]');
+    const modalCloseButtons = modal ? modal.querySelectorAll('[data-modal-close]') : [];
+    let modalSlides = [];
+    let modalIndex = 0;
+    let modalOnClose = null;
+
+    const renderModalSlide = () => {
+      if (!modal || !modalImage) return;
+      const slide = modalSlides[modalIndex];
+      if (!slide) return;
+      modalImage.src = slide.src;
+      modalImage.alt = slide.alt || '';
+      if (modalCaption) {
+        modalCaption.textContent = slide.caption || slide.alt || '';
+      }
+      if (modalCounter) {
+        modalCounter.textContent = `${modalIndex + 1} / ${modalSlides.length}`;
+      }
+    };
+
+    const openModal = (slidesData, startIndex = 0, options = {}) => {
+      if (!modal || !modalImage) return;
+      modalSlides = Array.isArray(slidesData) ? slidesData.slice() : [];
+      if (!modalSlides.length) return;
+      modalIndex = Math.max(Math.min(startIndex, modalSlides.length - 1), 0);
+      modalOnClose = typeof options.onClose === 'function' ? options.onClose : null;
+      renderModalSlide();
+      modal.classList.add('is-active');
+      if (document.body) {
+        document.body.classList.add('modal-open');
+      }
+    };
+
+    const closeModal = () => {
+      if (!modal) return;
+      modal.classList.remove('is-active');
+      if (document.body) {
+        document.body.classList.remove('modal-open');
+      }
+      modalSlides = [];
+      modalIndex = 0;
+      const callback = modalOnClose;
+      modalOnClose = null;
+      if (callback) callback();
+    };
+
+    if (modal) {
+      modalCloseButtons.forEach(btn => btn.addEventListener('click', closeModal));
+      modal.addEventListener('click', (event) => {
+        if (event.target === modal) closeModal();
+      });
+      if (modalPrev) {
+        modalPrev.addEventListener('click', () => {
+          if (!modalSlides.length) return;
+          modalIndex = (modalIndex - 1 + modalSlides.length) % modalSlides.length;
+          renderModalSlide();
+        });
+      }
+      if (modalNext) {
+        modalNext.addEventListener('click', () => {
+          if (!modalSlides.length) return;
+          modalIndex = (modalIndex + 1) % modalSlides.length;
+          renderModalSlide();
+        });
+      }
+      document.addEventListener('keydown', (event) => {
+        if (!modal.classList.contains('is-active')) return;
+        if (event.key === 'Escape') {
+          closeModal();
+        }
+        if (event.key === 'ArrowRight') {
+          if (!modalSlides.length) return;
+          modalIndex = (modalIndex + 1) % modalSlides.length;
+          renderModalSlide();
+        }
+        if (event.key === 'ArrowLeft') {
+          if (!modalSlides.length) return;
+          modalIndex = (modalIndex - 1 + modalSlides.length) % modalSlides.length;
+          renderModalSlide();
+        }
+      });
+    }
+
+
+    document.querySelectorAll('[data-product-card]').forEach(card => {
+      const id = card.dataset.productCard;
+      const product = PRODUCTS[id];
+      if (!product) return;
+      const badgeEl = card.querySelector('[data-product-badge]');
+      const nameEl = card.querySelector('h2');
+      const taglineEl = card.querySelector('[data-product-tagline]');
+      const descEl = card.querySelector('[data-product-description]') || card.querySelector('p');
+      const priceEl = card.querySelector('[data-product-price]');
+      if (nameEl && product.name) nameEl.textContent = product.name;
+      if (taglineEl) taglineEl.textContent = product.tagline || '';
+      if (descEl) descEl.textContent = product.description || product.tagline || '';
+      if (priceEl) priceEl.textContent = typeof product.usd === 'number' ? `$${product.usd}` : '--';
+      if (badgeEl) {
+        const hasBadge = Boolean(product.badge);
+        badgeEl.textContent = hasBadge ? product.badge : '';
+        badgeEl.classList.toggle('hidden', !hasBadge);
+      }
+    });
+
+    const timers = new Map();
+
+    document.querySelectorAll('[data-carousel]').forEach(carousel => {
+      const productId = carousel.dataset.carousel;
+      const inner = carousel.querySelector('[data-carousel-inner]');
+      if (!inner) return;
+      const dotsWrap = carousel.querySelector('[data-carousel-dots]');
+      const prevBtn = carousel.querySelector('[data-carousel-prev]');
+      const nextBtn = carousel.querySelector('[data-carousel-next]');
+      const slidesData = PRODUCT_MEDIA[productId] || [];
+
+      if (slidesData.length) {
+        inner.innerHTML = '';
+        slidesData.forEach((slide, index) => {
+          const figure = document.createElement('figure');
+          figure.className = 'carousel-slide' + (index === 0 ? ' is-active' : '');
+          if (slide.overlay) figure.style.setProperty('--overlay', slide.overlay);
+          const img = document.createElement('img');
+          img.src = slide.src;
+          img.alt = slide.alt || '';
+          img.loading = 'lazy';
+          figure.appendChild(img);
+          inner.appendChild(figure);
+        });
+      }
+
+      const slides = Array.from(inner.querySelectorAll('.carousel-slide'));
+      if (!slides.length) return;
+      let current = slides.findIndex(slide => slide.classList.contains('is-active'));
+      if (current === -1) {
+        current = 0;
+        slides[0].classList.add('is-active');
+      }
+
+      const dots = [];
+      if (dotsWrap) {
+        dotsWrap.innerHTML = '';
+        slides.forEach((_, index) => {
+          const dot = document.createElement('button');
+          dot.type = 'button';
+          dot.className = 'carousel-dot' + (index === current ? ' is-active' : '');
+          dot.setAttribute('aria-label', `Show image ${index + 1}`);
+          dot.addEventListener('click', () => {
+            show(index);
+            restart();
+          });
+          dotsWrap.appendChild(dot);
+          dots.push(dot);
+        });
+      }
+
+      const multi = slides.length > 1;
+      carousel.setAttribute('data-multi', multi ? 'true' : 'false');
+
+      const show = (index) => {
+        slides[current].classList.remove('is-active');
+        if (dots[current]) dots[current].classList.remove('is-active');
+        current = (index + slides.length) % slides.length;
+        slides[current].classList.add('is-active');
+        if (dots[current]) dots[current].classList.add('is-active');
+      };
+
+      const next = () => show(current + 1);
+      const prev = () => show(current - 1);
+
+      if (nextBtn) nextBtn.addEventListener('click', () => { next(); restart(); });
+      if (prevBtn) prevBtn.addEventListener('click', () => { prev(); restart(); });
+
+      let timer = null;
+      const stop = () => {
+        if (!timer) return;
+        clearInterval(timer);
+        timers.delete(carousel);
+        timer = null;
+      };
+      const start = () => {
+        if (!multi || timer) return;
+        timer = setInterval(() => { next(); }, 5000);
+        timers.set(carousel, timer);
+      };
+      const restart = () => {
+        stop();
+        start();
+      };
+
+      carousel.addEventListener('mouseenter', stop);
+      carousel.addEventListener('mouseleave', start);
+
+      inner.addEventListener('click', (event) => {
+        if (!modal || !slidesData.length) return;
+        const clickedSlide = event.target.closest('.carousel-slide');
+        const index = clickedSlide ? slides.indexOf(clickedSlide) : current;
+        const startIndex = index >= 0 ? index : current;
+        stop();
+        openModal(slidesData, startIndex, { onClose: start });
+      });
+      start();
+    });
+  });
+</script>
+
+<script src="support-contact.js"></script>
+</body>
+</html>

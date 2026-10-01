@@ -1,0 +1,24 @@
+# Local configuration and credentials
+/config/*.local.php
+.env
+.env.*
+!.env.example
+*.log
+*.tmp
+__pycache__/
+.pytest_cache/
+.venv/
+node_modules/
+
+# Local archives, unrelated project and source artwork
+/SAVES/
+/chatteroulette/
+/qr/
+/SAVE HOME.html
+/bloc already paid.txt
+/to do site.txt
+/to do site (2).txt
+/update_home_mod.py
+*.psd
+desktop.ini
+Thumbs.db
