@@ -9,7 +9,7 @@
     <div class="grid gap-4 md:grid-cols-2">
       <label class="block">Mode
         <select name="payment[mode]" class="mt-1 w-full rounded bg-black border border-white/20 p-2">
-          <option value="demo" <?= $paymentSettings['mode'] === 'demo' ? 'selected' : '' ?>>Démonstration (aucun envoi)</option>
+          <option value="demo" <?= $paymentSettings['mode'] === 'demo' ? 'selected' : '' ?>>Simulation (commandes de test, aucun paiement)</option>
           <option value="manual" <?= $paymentSettings['mode'] === 'manual' ? 'selected' : '' ?>>Paiement avec vérification manuelle</option>
         </select>
       </label>
@@ -29,7 +29,7 @@
           <option value="live" <?= $paymentSettings['rate_source'] === 'live' ? 'selected' : '' ?>>Taux en ligne (CoinGecko)</option>
           <option value="manual" <?= $paymentSettings['rate_source'] === 'manual' ? 'selected' : '' ?>>Taux fixes définis ci-dessous</option>
         </select>
-        <span class="block text-xs text-gray-400 mt-1">En démonstration, les taux fixes sont toujours utilisés. En ligne, un taux indisponible bloque le paiement.</span>
+        <span class="block text-xs text-gray-400 mt-1">En simulation, les taux fixes sont toujours utilisés. En ligne, un taux indisponible bloque le paiement.</span>
       </label>
     </div>
   </section>
@@ -46,8 +46,8 @@
         </label>
         <div>Réseau de réception<p class="mt-2 text-cyan-300"><?= h($asset['network']) ?></p></div>
         <label class="block md:col-span-2">Adresse publique de réception
-          <input name="payment[assets][<?= h($symbol) ?>][address]" maxlength="200" spellcheck="false" autocomplete="off" value="<?= h($wallet['address']) ?>" class="mt-1 w-full rounded bg-black border border-white/20 p-2 font-mono text-sm" placeholder="Adresse réelle ; facultative en démo">
-          <span class="block mt-1 text-xs text-gray-400">En démo, le site affiche une adresse fictive, même si vous renseignez une adresse réelle ici.</span>
+          <input name="payment[assets][<?= h($symbol) ?>][address]" maxlength="200" spellcheck="false" autocomplete="off" value="<?= h($wallet['address']) ?>" class="mt-1 w-full rounded bg-black border border-white/20 p-2 font-mono text-sm" placeholder="Adresse réelle ; facultative en simulation">
+          <span class="block mt-1 text-xs text-gray-400">En simulation, le site affiche une adresse fictive, même si vous renseignez une adresse réelle ici.</span>
         </label>
         <label class="block">Taux fixe : 1 <?= h($symbol) ?> = combien de USD ?
           <input type="number" min="0.00000001" max="1000000000" step="any" required name="payment[assets][<?= h($symbol) ?>][manual_rate]" value="<?= h($wallet['manual_rate']) ?>" class="mt-1 w-full rounded bg-black border border-white/20 p-2">
@@ -62,12 +62,8 @@
       <label class="block">E-mail du support
         <input type="email" name="payment[support_email]" maxlength="254" value="<?= h($paymentSettings['support_email']) ?>" class="mt-1 w-full rounded bg-black border border-white/20 p-2">
       </label>
-      <label class="block">Identifiant du formulaire Formspree
-        <input name="payment[formspree_id]" maxlength="80" pattern="[a-zA-Z0-9]{6,80}" value="<?= h($paymentSettings['formspree_id']) ?>" class="mt-1 w-full rounded bg-black border border-white/20 p-2" placeholder="Identifiant après /f/">
-        <span class="block mt-1 text-xs text-gray-400">Le compte et l'adresse destinataire se configurent dans Formspree. L'e-mail de support ci-dessus ne change pas ce destinataire. Aucun envoi en mode démo.</span>
-      </label>
     </div>
-    <label class="flex items-center gap-3"><input type="checkbox" name="payment[proof_required]" value="1" <?= $paymentSettings['proof_required'] ? 'checked' : '' ?>> Exiger aussi une pièce jointe (en plus du TXID)</label>
+    <p class="text-sm text-gray-400">Les commandes et les références sont enregistrées sur ce site, dans l'onglet Commandes. Aucun compte Formspree, pièce jointe ou service d'envoi d'e-mails n'est nécessaire. Les clients suivent leur commande avec leur lien privé.</p>
     <label class="block">Instructions affichées au paiement
       <textarea name="payment[instructions]" maxlength="2000" rows="3" class="mt-1 w-full rounded bg-black border border-white/20 p-2"><?= h($paymentSettings['instructions']) ?></textarea>
     </label>
@@ -76,7 +72,7 @@
     </label>
   </section>
   <div class="sticky bottom-0 bg-[#0b0c10]/95 border-t border-white/10 py-4 flex flex-wrap gap-4 items-center">
-    <button class="rounded bg-cyan-950 border border-cyan-800 px-5 py-3 font-bold">Enregistrer les paiements</button>
-    <a href="payment.html" class="text-sm text-gray-300 underline">Voir le paiement</a>
+    <button class="button primary">Enregistrer les paiements</button>
+    <a href="payment.html" class="button">Voir le paiement</a>
   </div>
 </form>

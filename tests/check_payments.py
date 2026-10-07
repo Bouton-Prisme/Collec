@@ -33,9 +33,9 @@ with sync_playwright() as p:
         expect(admin.get_by_role('status')).to_have_text('Configuration de paiement enregistrée.')
     try:
         admin.goto(URL + 'admin.php')
-        admin.get_by_label('Password', exact=True).fill('admin')
-        admin.get_by_role('button', name='Login', exact=True).click()
-        admin.get_by_role('link', name='Paiements', exact=True).click()
+        admin.get_by_label('Mot de passe', exact=True).fill('admin')
+        admin.get_by_role('button', name='Se connecter', exact=True).click()
+        admin.get_by_role('link', name='Payments', exact=True).click()
         admin.screenshot(path=str(OUT / 'payment-settings-desktop.png'), full_page=True)
         field('mode').select_option('demo')
         field('enabled').check()
@@ -67,39 +67,11 @@ with sync_playwright() as p:
         shop.goto(URL + 'payment.html?value=7&asset=BTC')
         expect(shop.locator('#currency option')).to_have_count(1)
         expect(shop.locator('#currency')).to_have_value('ETH')
-        expect(shop.locator('#copyAmt')).to_have_text('0.002')
+        expect(shop.locator('#payAmount')).to_contain_text('5.00 USD')
+        expect(shop.locator('#paymentDetails')).to_be_hidden()
         expect(shop.locator('#paymentNetwork')).to_have_text('Ethereum mainnet')
-        expect(shop.locator('#paymentInstructions')).to_have_text('Use the Ethereum mainnet network only.')
         expect(shop.locator('#paymentSupport')).to_have_attribute('href', 'mailto:demo-support@example.invalid')
-        shop.locator('#proofLink').click()
-        expect(shop.locator('[type="submit"]')).to_be_enabled()
-        # Changing any public settings invalidates an already-open checkout.
-        field('proof_required').check()
-        save()
-        shop.locator('[name="buyer_email"]').fill('demo@example.invalid')
-        shop.locator('#txid').fill('TEST-ONLY')
-        shop.get_by_role('button', name='Simulate submission').click()
-        expect(shop.locator('#proof-status')).to_contain_text('settings have changed')
-        assert not external_posts
-        shop.goto(URL + 'payment.html?value=7')
-        shop.locator('#proofLink').click()
-        expect(shop.locator('[name="proof"]')).to_have_attribute('required', '')
-        shop.locator('[name="proof"]').set_input_files({'name': 'demo.png', 'mimeType': 'image/png', 'buffer': b'test-only'})
-        shop.locator('[name="buyer_email"]').fill('demo@example.invalid')
-        shop.locator('#txid').fill('TEST-ONLY')
-        shop.get_by_role('button', name='Simulate submission').click()
-        expect(shop.locator('#proof-status')).to_contain_text('Demo complete')
-        assert not external_posts
-        # Browser quote expiry must hide payment and invalidate the form snapshot.
-        shop.clock.install()
-        shop.goto(URL + 'payment.html?value=7')
-        expect(shop.locator('#proofLink')).to_be_visible()
-        shop.clock.fast_forward(61000)
-        expect(shop.locator('#proofLink')).to_be_hidden()
-        expect(shop.locator('#payTitle')).to_contain_text('expired')
-        shop.locator('#refreshQuote').click()
-        expect(shop.locator('#proofLink')).to_be_visible()
-        shop.clock.resume()
+        # Order rates, expiry and reference submission are covered in check_orders.py.
         # Invalid configuration cannot overwrite the saved version.
         before = FILE.read_bytes()
         field('default_asset').select_option('BTC')
@@ -113,30 +85,13 @@ with sync_playwright() as p:
         assert FILE.read_bytes() == before
         admin.reload()
         field('mode').select_option('manual')
-        admin.get_by_role('button', name='Enregistrer les paiements', exact=True).click()
-        expect(admin.get_by_text('Renseignez votre identifiant Formspree avant d’activer le paiement manuel.')).to_be_visible()
-        assert FILE.read_bytes() == before
-        admin.reload()
-        field('mode').select_option('manual')
         field('rate_source').select_option('manual')
-        field('formspree_id').fill('testonly123')
         save()
+        settings = context.request.get(URL + 'payment-config.php').json()
+        assert settings['mode'] == 'manual' and not settings['form_endpoint']
+        expect(admin.locator('[name="payment[formspree_id]"]')).to_have_count(0)
         shop.goto(URL + 'payment.html?value=7')
-        expect(shop.locator('#copyAddr')).to_have_text('0x1111111111111111111111111111111111111111')
-        expect(shop.locator('#copyAmt')).to_have_text('0.002')
-        shop.locator('#proofLink').click()
-        expect(shop.locator('#proof-form')).to_have_attribute('action', 'https://formspree.io/f/testonly123')
-        expect(shop.locator('#processingMessage')).to_have_text('Manual review within one working day.')
-        # Live rates: validate success and fail closed; no live rate provider required in tests.
-        field('rate_source').select_option('live')
-        save()
-        shop.route('https://api.coingecko.com/**', lambda route: route.fulfill(json={'ethereum': {'usd': 2000}}))
-        shop.goto(URL + 'payment.html?value=7')
-        expect(shop.locator('#copyAmt')).to_have_text('0.0025')
-        shop.unroute('https://api.coingecko.com/**')
-        shop.route('https://api.coingecko.com/**', lambda route: route.fulfill(status=503, body='unavailable'))
-        shop.goto(URL + 'payment.html?value=7')
-        expect(shop.locator('#proofLink')).to_be_hidden()
+        expect(shop.locator('#checkout-delay')).to_have_text('Manual review within one working day.')
         expect(shop.locator('#paymentDetails')).to_be_hidden()
         # Pause checkout, including already-known direct order URLs.
         field('enabled').uncheck()
@@ -145,8 +100,7 @@ with sync_playwright() as p:
         expect(shop.locator('#paymentAvailability')).to_contain_text('temporarily unavailable')
         expect(shop.locator('#proofLink')).to_be_hidden()
         shop.goto(URL + 'TYP.html?value=7&asset=ETH')
-        expect(shop.locator('[type="submit"]')).to_be_disabled()
-        expect(shop.locator('#order-summary-content')).to_contain_text('temporarily unavailable')
+        expect(shop.locator('#resume-checkout')).to_be_visible()
         for width in [375, 320]:
             admin.set_viewport_size({'width': width, 'height': 812})
             admin.goto(URL + 'admin.php?tab=payment')
@@ -160,7 +114,7 @@ with sync_playwright() as p:
         expect(shop.locator('#paymentAvailability')).to_contain_text('could not be loaded')
         assert not errors, errors
         assert not external_posts, external_posts
-        print('PASS: settings save, active assets/default, rates, wallet privacy, CSRF, validation, expiry, stale checkout, attachments, pause, corruption, mobile; no external submission.', flush=True)
+        print('PASS: settings save, active assets/default, wallet privacy, CSRF, validation, manual mode without Formspree, pause, corruption, mobile; no external submission.', flush=True)
     finally:
         if ORIGINAL is None:
             FILE.unlink(missing_ok=True)

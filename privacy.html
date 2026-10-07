@@ -5,20 +5,27 @@
   <title>Privacy Policy - BitShop</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="site-ui.css">
 </head>
-<body class="bg-black text-white p-8">
-  <a href="home.html" class="inline-block mb-8 underline">← Back to catalogue</a>
-  <p data-site-demo class="mb-6 text-sm text-cyan-300">Demonstration site — sample catalogue, no real orders.</p>
+<body class="storefront info-page">
+  <header class="site-header">
+    <nav class="site-nav" aria-label="Main navigation">
+      <a class="site-brand" href="home.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="m12 3 9 5v8l-9 5-9-5V8zM3 8l9 5 9-5M12 13v8M7.5 5.5l9 5"/></svg>BitShop</a>
+      <div class="site-nav__actions"><a class="ui-button" href="home.html">Products</a><a class="ui-button" href="roulette.html">Roulette</a></div>
+    </nav>
+  </header>
+  <main class="info-card">
   <h1 class="text-3xl font-bold mb-6">Privacy Policy</h1>
   <p class="mb-4">We value your privacy. This store operates with minimal data collection:</p>
   <ul class="list-disc ml-6 space-y-2">
     <li>No account creation required.</li>
-    <li>No tracking cookies or analytics tools.</li>
-    <li>Payments are fully processed by the blockchain (BTC, ETH, XMR).</li>
-    <li>The only data we require is your <b>proof of payment</b> (TXID or screenshot).</li>
-    <li>We do not sell, share, or retain personal information.</li>
+    <li>Essential session cookies protect checkout forms and administrator access.</li>
+    <li>Crypto transfers take place on the selected network. The shop checks payments manually; no payment reference is sent to Formspree by this checkout.</li>
+    <li>We store your contact email, order details, transaction reference, optional message and order status on this site to process your order.</li>
+    <li>Your private tracking link provides access to your order details. Keep it confidential. Contact support for questions about access, correction or deletion of your data.</li>
   </ul>
   <p class="mt-8 text-sm text-gray-400">For any question about your data, contact: <span data-support-email>Loading support contact?</span></p>
+  </main>
 <script src="support-contact.js"></script>
 </body>
 </html>

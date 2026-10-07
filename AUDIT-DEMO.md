@@ -1,5 +1,10 @@
 # État du site pour la démonstration — 1er octobre 2026
 
+> Archive : ce rapport décrit le parcours du 1er octobre. Depuis le 6 octobre,
+> les commandes sont enregistrées côté serveur et disposent d'un lien privé de suivi
+> et d'un onglet d'administration. Formspree n'est plus utilisé par le parcours.
+> Consulter `PAIEMENTS-ET-COMMANDES.md` pour l'état actuel et les tests correspondants.
+
 Le parcours de démonstration fonctionne après les corrections décrites ci-dessous.
 Le site reste un prototype de boutique : il ne permet pas encore de gérer de vraies
 ventes de bout en bout.

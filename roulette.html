@@ -1,19 +1,13 @@
 <!DOCTYPE html>
-<html lang="en" class="dark" data-zoom="80">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Roulette - BitShop</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = { darkMode: 'class' };
-  </script>
+  <link rel="stylesheet" href="site-ui.css">
   <style>
     :root { --bg: #0b0c10; }
     html { font-size: 16px; }
-    html[data-zoom="90"] { font-size: 14.4px; }
-    html[data-zoom="80"] { font-size: 12.8px; }
-    html[data-zoom="75"] { font-size: 11.8px; }
     html, body { min-height: 100%; }
     body {
       margin: 0;
@@ -27,8 +21,8 @@
     }
     .coverflow-stage {
       position: relative;
-      width: min(100vw, 1120px);
-      height: clamp(300px, 42vw, 470px);
+      width: 100%;
+      height: 320px;
       perspective: 1300px;
       perspective-origin: 50% 50%;
       overflow: hidden;
@@ -60,7 +54,8 @@
       position: absolute;
       left: 50%;
       top: 50%;
-      width: clamp(170px, 24vw, 320px);
+      width: 220px;
+      margin: 0;
       aspect-ratio: 4 / 4;
       border: 1px solid rgba(255,255,255,.16);
       border-radius: 10px;
@@ -88,7 +83,7 @@
     .coverflow-card img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
       padding: 0;
       user-select: none;
       -webkit-user-drag: none;
@@ -98,31 +93,12 @@
       box-shadow: 0 34px 90px rgba(56,189,248,.16), 0 0 0 1px rgba(103,232,249,.26);
     }
     .coverflow-stage.is-revealed .coverflow-card:not(.is-active) {
-      opacity: 0 !important;
+      filter: saturate(.45) brightness(.7) !important;
       pointer-events: none;
     }
-    .coverflow-stage.is-revealed {
-      height: min(68vh, 620px);
-      overflow: visible;
-    }
     .coverflow-stage.is-revealed .coverflow-card.is-active {
-      width: min(92vw, 900px);
-      height: min(68vh, 620px);
-      aspect-ratio: auto;
-      border-color: transparent;
-      background: transparent;
-      box-shadow: none;
-      overflow: visible;
-    }
-    .coverflow-stage.is-revealed .coverflow-card.is-active .coverflow-media {
-      background: transparent;
-      overflow: visible;
-    }
-    .coverflow-stage.is-revealed .coverflow-card.is-active img {
-      object-fit: contain;
-    }
-    .coverflow-stage.is-revealed .coverflow-marker {
-      opacity: 0;
+      border-color: #a99cff;
+      box-shadow: 0 16px 50px #7865ff40, 0 0 0 2px #a99cff66;
     }
     .coverflow-card.is-winner {
       animation: revealPop .7s cubic-bezier(.18,.9,.24,1.25);
@@ -139,78 +115,73 @@
       box-shadow: 0 0 24px rgba(103,232,249,.55);
       z-index: 2;
     }
-    .roulette-result {
-      min-height: 1.5rem;
-    }
-    .roulette-filename {
-      margin-top: 12px;
-      min-height: 2.2rem;
-      max-width: min(90vw, 720px);
-      font-size: clamp(1.15rem, 2vw, 1.65rem);
-      font-weight: 800;
-      line-height: 1.2;
-      color: rgba(255,255,255,.96);
-      text-wrap: balance;
-      overflow-wrap: anywhere;
-      text-shadow: 0 0 24px rgba(103,232,249,.18);
-      opacity: 0;
-      transform: translateY(-4px);
-      transition: opacity .25s ease, transform .25s ease;
-    }
-    .roulette-filename.is-visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    .roulette-page { flex: 1; width: min(100%, 900px); margin: 0 auto; padding: 32px 24px 40px; }
+    .roulette-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+    .roulette-heading h1 { margin: 0; }
+    .roulette-intro { margin: 4px 0 0; color: #b9c5d8; }
+    .roulette-balance { flex-shrink: 0; display: flex; align-items: center; gap: 10px; padding: 10px 14px; border: 1px solid #4c4569; border-radius: 10px; background: #171c30; color: #c5cee0; }
+    .roulette-balance strong { color: #f2f3fb; }
+    .roulette-panel { padding: 8px 16px 24px; text-align: center; border: 1px solid #35405b; border-radius: 18px; background: linear-gradient(145deg, #121a2a, #0c121e); }
+    .roulette-feedback { min-height: 96px; padding: 12px 0; display: flex; flex-direction: column; justify-content: center; }
+    .roulette-result { margin: 0; color: #c5cee0; font-size: 15px; line-height: 1.5; }
+    .roulette-pack-name { display: none; margin: 6px auto 0; max-width: 640px; font-size: clamp(20px, 3vw, 26px); font-weight: 800; line-height: 1.2; color: #f2f3fb; text-wrap: balance; overflow-wrap: anywhere; }
+    .roulette-pack-name.is-visible { display: block; }
+    .roulette-page [data-spin-button] { min-width: 240px; min-height: 48px; font-size: 15px; background: #6550d8; border-color: #a99cff; }
+    .roulette-page [data-spin-button]:hover:not(:disabled) { background: #705be3; }
+    .roulette-page [data-spin-button]:disabled { opacity: 1; background: #30354f; border-color: #64708c; color: #d6deed; cursor: wait; }
     @keyframes revealPop {
-      0% { transform: translate(-50%, -50%) translateZ(220px) rotateY(0deg) scale(.88); }
-      45% { transform: translate(-50%, -50%) translateZ(240px) rotateY(0deg) scale(1.04); }
-      100% { transform: translate(-50%, -50%) translateZ(220px) rotateY(0deg) scale(1); }
+      0% { transform: translate(-50%, -50%) translateZ(100px) scale(.94); }
+      45% { transform: translate(-50%, -50%) translateZ(100px) scale(1.03); }
+      100% { transform: translate(-50%, -50%) translateZ(100px) scale(1); }
     }
     @media (max-width: 640px) {
-      .coverflow-stage { height: 300px; }
-      .coverflow-card { width: 190px; }
-      .coverflow-stage.is-revealed .coverflow-card.is-active {
-        width: min(94vw, 620px);
-        height: min(54vh, 420px);
-      }
+      .roulette-page { padding: 20px 12px 28px; }
+      .roulette-heading { align-items: flex-start; flex-direction: column; gap: 12px; margin-bottom: 16px; }
+      .roulette-balance { padding: 6px 12px; }
+      .roulette-panel { padding: 0 12px 20px; }
+      .coverflow-stage { height: 264px; }
+      .coverflow-card { width: 172px; }
+      .roulette-page [data-spin-button] { width: 100%; min-width: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .coverflow-card { transition: none; }
+      .coverflow-card.is-winner { animation: none; }
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col bg-white text-black transition-colors dark:bg-black dark:text-white">
-  <header>
-    <nav class="flex justify-between items-center px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
-      <a href="home.html" class="font-bold text-white text-lg mt-1">BitShop</a>
-      <div class="flex items-center gap-3">
-        <a href="home.html" class="px-4 py-2 text-white border border-white rounded text-sm hover:bg-white hover:text-black inline-block">Home</a>
-        <a href="admin.php" class="px-4 py-2 text-white border border-white rounded text-sm hover:bg-white hover:text-black inline-block">Admin</a>
-      </div>
+<body class="storefront">
+  <header class="site-header">
+    <nav class="site-nav" aria-label="Main navigation">
+      <a class="site-brand" href="home.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="m12 3 9 5v8l-9 5-9-5V8zM3 8l9 5 9-5M12 13v8M7.5 5.5l9 5"/></svg>BitShop</a>
+      <div class="site-nav__actions"><a class="ui-button" href="home.html">Products</a><a class="ui-button" href="admin.php">Admin</a></div>
     </nav>
   </header>
 
-  <main class="flex-1 text-center pt-16 px-4 pb-16">
-    <h1 class="text-3xl font-bold">Roulette</h1>
-    <p class="text-gray-600 dark:text-gray-500 text-lg mb-12">Use a token and reveal a random configured image.</p>
-
-    <section class="mx-auto flex max-w-5xl flex-col items-center">
-      <div class="coverflow-stage" data-coverflow-stage>
+  <main class="roulette-page">
+    <div class="roulette-heading">
+      <div>
+        <h1 id="roulette-title">Roulette</h1>
+        <p class="roulette-intro">Spin to discover a random pack.</p>
+      </div>
+      <div class="roulette-balance" aria-label="Token balance: unlimited">
+        <span>Tokens</span><strong>Unlimited</strong>
+      </div>
+    </div>
+    <section class="roulette-panel" aria-labelledby="roulette-title">
+      <div class="coverflow-stage" data-coverflow-stage aria-hidden="true">
         <div class="coverflow-marker" aria-hidden="true"></div>
       </div>
-      <div class="roulette-filename" data-roulette-filename></div>
-
-      <div class="mt-10 flex flex-col items-center gap-4">
-        <button type="button"
-          class="px-6 py-3 text-white font-bold rounded-lg bg-cyan-950 border border-sky-700 hover:opacity-90 transition disabled:cursor-not-allowed disabled:opacity-50"
-          data-spin-button>
-          Use token
-        </button>
-        <p class="roulette-result text-sm text-gray-400" data-roulette-status>Unlimited tokens available.</p>
+      <div class="roulette-feedback" role="status" aria-live="polite" aria-atomic="true">
+        <p class="roulette-result" data-roulette-status>Loading packs&hellip;</p>
+        <p class="roulette-pack-name" data-roulette-filename></p>
       </div>
+      <button type="button" class="ui-button" data-spin-button disabled>Loading packs&hellip;</button>
     </section>
   </main>
 
-  <footer class="flex flex-col sm:flex-row justify-between text-xs text-gray-400 dark:text-gray-500 px-6 py-8 border-t border-gray-200 dark:border-gray-700">
-    <div>© 2025 BitShop</div>
-    <div class="flex gap-6 mt-2 sm:mt-0">
+  <footer class="site-footer">
+    <div>&copy; 2025 BitShop</div>
+    <div>
       <a href="support.html">Support</a>
       <a href="privacy.html">Privacy</a>
       <a href="terms.html">Terms</a>
@@ -231,7 +202,9 @@
       const stage = document.querySelector('[data-coverflow-stage]');
       const button = document.querySelector('[data-spin-button]');
       const status = document.querySelector('[data-roulette-status]');
-      const filename = document.querySelector('[data-roulette-filename]');
+      const packName = document.querySelector('[data-roulette-filename]');
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+      let products = [];
       let media = fallbackMedia;
       let spinning = false;
       let revealed = false;
@@ -246,6 +219,7 @@
         const response = await fetch(`products.json?v=${Date.now()}`, { cache: 'no-store' });
         if (response.ok) {
           const config = await response.json();
+          products = Object.values(config.products || {});
           const rouletteMedia = validMedia(config.roulette && config.roulette.media);
           if (rouletteMedia.length) {
             media = rouletteMedia;
@@ -265,19 +239,29 @@
         return distance;
       };
 
-      const fileNameFromSrc = (src) => {
-        const clean = String(src || '').split('?')[0].split('#')[0];
-        return decodeURIComponent(clean.split('/').pop() || clean || 'Selected image');
+      // Match configured media to catalogue names; never expose upload filenames.
+      const mediaKey = (src) => {
+        try {
+          const url = new URL(src, document.baseURI);
+          return url.origin + url.pathname;
+        } catch { return String(src || ''); }
       };
-
-      const updateFilename = () => {
-        if (!filename || !media[activeIndex]) return;
-        filename.textContent = fileNameFromSrc(media[activeIndex].src);
+      const displayName = (item, index) => {
+        const product = products.find(product => product && validMedia(product.media)
+          .some(image => mediaKey(image.src) === mediaKey(item.src)));
+        const name = typeof item.name === 'string' ? item.name.trim() : '';
+        const productName = typeof product?.name === 'string' ? product.name.trim() : '';
+        const alt = typeof item.alt === 'string' ? item.alt.trim() : '';
+        const descriptiveAlt = !/^(roulette|selected|product)?\s*image(?:\s+\d+)?$/i.test(alt)
+          && !/[/\\]|\.(png|jpe?g|webp|gif|svg|avif)(?:[?#].*)?$/i.test(alt)
+          && !/^[a-f0-9]{16,}$/i.test(alt);
+        return name || productName || (descriptiveAlt ? alt : '') || `Pack ${index + 1}`;
       };
+      media = media.map((item, index) => ({ ...item, name: displayName(item, index) }));
 
-      const showFilename = (visible) => {
-        if (!filename) return;
-        filename.classList.toggle('is-visible', visible);
+      const showPackName = (visible) => {
+        packName.textContent = visible ? media[activeIndex].name : '';
+        packName.classList.toggle('is-visible', visible);
       };
 
       const renderCoverflow = () => {
@@ -293,13 +277,10 @@
 
           const img = document.createElement('img');
           img.src = item.src;
-          img.alt = item.alt || 'Roulette image';
+          img.alt = item.name;
           img.loading = 'lazy';
           frame.appendChild(img);
           card.appendChild(frame);
-          card.addEventListener('click', () => {
-            if (!spinning) moveTo(index);
-          });
           stage.appendChild(card);
           return card;
         });
@@ -308,7 +289,7 @@
 
       const updateCoverflow = (winner = false) => {
         const stageWidth = stage ? stage.getBoundingClientRect().width : 980;
-        const spacing = Math.max(118, Math.min(205, stageWidth * .17));
+        const spacing = Math.max(84, Math.min(170, stageWidth * .2));
 
         cards.forEach((card, index) => {
           const distance = coverflowSlot(index, activeIndex);
@@ -317,23 +298,22 @@
           const direction = distance < 0 ? -1 : 1;
           const isRevealedWinner = revealed && abs === 0;
           const translateX = isRevealedWinner ? 0 : distance * spacing;
-          const translateZ = isRevealedWinner ? 220 : (abs === 0 ? 140 : 40 - abs * 44);
+          const translateZ = isRevealedWinner ? 100 : (abs === 0 ? 100 : 40 - abs * 44);
           const rotateY = abs === 0 ? 0 : direction * -48;
           const scale = isRevealedWinner ? 1 : Math.max(.66, 1 - abs * .1);
-          const opacity = visible ? Math.max(.28, 1 - abs * .2) : 0;
+          const opacity = visible ? (revealed && abs > 0 ? .22 : Math.max(.28, 1 - abs * .2)) : 0;
           const blur = abs > 2 ? 1.5 : 0;
 
           card.classList.toggle('is-active', abs === 0);
           card.classList.toggle('is-winner', winner && abs === 0);
           card.style.zIndex = String(20 - abs);
           card.style.opacity = String(opacity);
-          card.style.pointerEvents = visible ? 'auto' : 'none';
+          card.style.pointerEvents = 'none';
           card.style.filter = `blur(${blur}px) saturate(${abs === 0 ? 1.08 : .86})`;
           card.style.left = `calc(50% + ${translateX}px)`;
           card.style.transform = `translate(-50%, -50%) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`;
         });
 
-        updateFilename();
       };
 
       const moveTo = (index, winner = false) => {
@@ -341,13 +321,16 @@
         if (!winner) {
           revealed = false;
           stage?.classList.remove('is-revealed');
-          showFilename(false);
+          showPackName(false);
         }
         updateCoverflow(winner);
       };
 
       const randomIndex = () => Math.floor(Math.random() * media.length);
       renderCoverflow();
+      status.textContent = 'Ready to discover your pack?';
+      button.textContent = 'Spin (1 token)';
+      button.disabled = false;
       window.addEventListener('resize', () => updateCoverflow());
 
       button?.addEventListener('click', () => {
@@ -356,12 +339,13 @@
         revealed = false;
         button.disabled = true;
         stage?.classList.remove('is-revealed');
-        showFilename(false);
-        if (status) status.textContent = 'Spinning...';
+        showPackName(false);
+        if (status) status.textContent = 'Choosing your pack...';
+        button.textContent = 'Spinning...';
 
         const winnerIndex = randomIndex();
         let delay = 54;
-        const deadline = Date.now() + 4000;
+        const deadline = Date.now() + (reducedMotion.matches ? 0 : 4000);
         let steps = 0;
 
         const tick = () => {
@@ -373,8 +357,9 @@
             stage?.classList.add('is-revealed');
             moveTo(winnerIndex, true);
             window.setTimeout(() => cards[winnerIndex]?.classList.remove('is-winner'), 800);
-            showFilename(true);
-            if (status) status.textContent = '';
+            showPackName(true);
+            if (status) status.textContent = 'Pack revealed';
+            button.textContent = 'Spin again (1 token)';
             button.disabled = false;
             spinning = false;
             return;

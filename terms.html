@@ -5,19 +5,26 @@
   <title>Terms of Service - BitShop</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="site-ui.css">
 </head>
-<body class="bg-black text-white p-8">
-  <a href="home.html" class="inline-block mb-8 underline">← Back to catalogue</a>
-  <p data-site-demo class="mb-6 text-sm text-cyan-300">Demonstration site — sample catalogue, no real orders.</p>
+<body class="storefront info-page">
+  <header class="site-header">
+    <nav class="site-nav" aria-label="Main navigation">
+      <a class="site-brand" href="home.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="m12 3 9 5v8l-9 5-9-5V8zM3 8l9 5 9-5M12 13v8M7.5 5.5l9 5"/></svg>BitShop</a>
+      <div class="site-nav__actions"><a class="ui-button" href="home.html">Products</a><a class="ui-button" href="roulette.html">Roulette</a></div>
+    </nav>
+  </header>
+  <main class="info-card">
   <h1 class="text-3xl font-bold mb-6">Terms of Service</h1>
   <ul class="list-disc ml-6 space-y-3">
     <li>By purchasing, you agree to provide valid proof of payment.</li>
     <li>All sales are final — due to the digital nature of our products, we cannot offer refunds.</li>
-    <li>Delivery: download link is sent by email within 24 hours after payment confirmation.</li>
+    <li>Payments are reviewed manually within the time shown at checkout. Submitting a transaction ID does not confirm payment. Delivery is arranged by the shop after verification; follow your private order page for updates. This checkout does not send automatic emails.</li>
     <li>We reserve the right to refuse suspicious or fraudulent transactions.</li>
     <li>Use of this site and products is at your own risk. We provide no warranty beyond delivery of the purchased files.</li>
   </ul>
   <p class="mt-8 text-sm text-gray-400">Updated: 2025</p>
+  </main>
 <script src="support-contact.js"></script>
 </body>
 </html>

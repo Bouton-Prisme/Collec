@@ -91,7 +91,6 @@ function validate_payment_settings($input) {
     $next['default_asset'] = $input['default_asset'] ?? '';
     if (!is_string($next['default_asset']) || !array_key_exists($next['default_asset'], payment_assets())) throw new InvalidArgumentException('Crypto par défaut invalide.');
     if ($next['enabled'] && (!count($active) || !in_array($next['default_asset'], $active, true))) throw new InvalidArgumentException('Activez au moins une crypto et choisissez une crypto active par défaut.');
-    if ($next['enabled'] && $next['mode'] === 'manual' && $next['formspree_id'] === '') throw new InvalidArgumentException('Renseignez votre identifiant Formspree avant d’activer le paiement manuel.');
     return $next;
 }
 
@@ -110,7 +109,7 @@ function save_payment_settings($settings) {
 
 function public_payment_settings($settings) {
     $public = array_intersect_key($settings, array_flip(['enabled', 'mode', 'default_asset', 'invoice_minutes', 'rate_source', 'support_email', 'proof_required', 'instructions', 'processing_message']));
-    $public['form_endpoint'] = $settings['mode'] === 'manual' && $settings['formspree_id'] !== '' ? 'https://formspree.io/f/' . $settings['formspree_id'] : '';
+    $public['form_endpoint'] = ''; // References now stay in the local order store.
     $public['assets'] = [];
     foreach (payment_assets() as $symbol => $asset) {
         $value = $settings['assets'][$symbol];

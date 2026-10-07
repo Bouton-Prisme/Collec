@@ -1,95 +1,78 @@
-# Paiements, commandes et livraison
+﻿# Paiements et commandes — parcours manuel
 
-## Ce qui fonctionne maintenant
+Le parcours ne nécessite plus Formspree ni prestataire de paiement payant.
+Il conserve la vérification manuelle de la réception dans le portefeuille.
 
-L'onglet **Admin → Paiements** configure le parcours existant : activation globale,
-mode démo ou manuel, cryptos actives, devise par défaut, libellés internes des
-portefeuilles, adresses de réception, taux, délai d'expiration, support, instructions,
-formulaire Formspree et pièce jointe obligatoire ou facultative.
+## Parcours client
 
-Chaque crypto dispose d'une adresse sur son réseau principal. Ajouter une nouvelle
-crypto ou un autre réseau nécessitera une intégration spécifique (validation
-d'adresse, précision, conversion, QR code et, ensuite, vérification du paiement).
-Les réglages restent en démonstration par défaut. Aucun portefeuille réel n'a été
-inventé, aucune transaction effectuée et aucun e-mail envoyé pendant les tests.
+1. Choisir un produit, une crypto et saisir un e-mail de contact.
+2. Créer la commande avant de payer. Le serveur relit le catalogue et calcule
+   le prix et le montant crypto ; les montants du navigateur ne font pas foi.
+3. Consulter le numéro de commande, le réseau, le montant exact, l'adresse,
+   le QR code et le bouton d'ouverture d'un portefeuille compatible.
+4. Sauvegarder le lien privé de suivi. Il donne accès aux détails de la commande :
+   il ne doit pas être partagé publiquement. Aucun e-mail automatique n'est envoyé.
+5. Après le transfert, saisir le TXID et éventuellement un message. La référence
+   est enregistrée « À vérifier ». Elle ne prouve pas la réception du paiement.
+6. Actualiser la page de suivi pour consulter la décision et le message de la boutique.
 
-Les réglages privés restent dans `config/payment.local.php`, ignoré par Git ; les
-noms internes des comptes sont retirés de la réponse publique. Les sauvegardes
-admin sont protégées par un jeton CSRF. Le contrôle des adresses vérifie leur
-format et le réseau attendu, pas leur checksum complet ni leur propriétaire.
+Le mode démo crée des commandes de test explicitement identifiées : ne pas envoyer
+ de crypto. Les références fictives sont acceptées dans ce mode uniquement.
 
-## Ce que signifie « vérifier un paiement »
+Le montant et l'adresse d'une commande sont conservés même si les réglages changent.
+Après expiration, les instructions de transfert sont masquées. Le client peut encore
+soumettre la référence d'un transfert déjà effectué ; il ne doit pas repayer.
+Le même TXID ne peut pas être déclaré pour deux commandes du même mode et de la même
+crypto. Les renvois d'une même requête de création dans la même session sont idempotents.
 
-Un TXID saisi ou une capture d'écran n'est pas une confirmation. Il faut vérifier
-que la transaction existe, arrive à la bonne destination, sur le bon réseau, pour
-le montant attendu et avec le nombre de confirmations retenu. Il faut aussi empêcher
-qu'une même transaction valide plusieurs commandes et traiter les paiements
-incomplets, trop élevés ou reçus après expiration.
+## Administration
 
-Deux possibilités :
+Dans **Admin → Commandes**, rechercher par numéro, e-mail ou TXID et ouvrir la commande.
+Contrôler le réseau, la destination, le montant réellement reçu et les confirmations
+ dans le portefeuille, puis confirmer le passage à **Paiement validé**.
+Après avoir effectivement livré le produit, passer à **Livrée**.
+Un message visible par le client peut préciser les étapes suivantes ou la livraison.
+Les modifications de statut sont conservées dans l'historique. Les statuts payée et
+livrée exigent une confirmation explicite de l'administrateur.
 
-- **Validation manuelle** : la commande est enregistrée « en attente » ; tu contrôles
-  la réception dans ton portefeuille, puis tu la marques payée dans l'administration.
-  La livraison peut ensuite être automatique. Aucun prestataire de paiement n'est
-  indispensable pour ce parcours.
-- **Validation automatique** : le serveur crée une facture chez un prestataire ou
-  un service auto-hébergé. Une notification signée confirme le paiement ; le serveur
-  contrôle cette notification et met à jour la commande. Les notifications répétées
-  doivent être traitées sans envoyer plusieurs livraisons.
+L'onglet **Paiements** conserve les portefeuilles, cryptos actives, source des taux,
+durée, instructions, support et délai annoncé. Formspree et les pièces jointes ne
+font plus partie du parcours. Suspendre les nouvelles commandes ne bloque pas les
+liens de suivi des commandes existantes.
 
-BTCPay Server fournit par exemple une API de facturation et des notifications
-`InvoiceProcessing` / `InvoiceSettled`. Son
-[guide d'intégration e-commerce](https://docs.btcpayserver.org/Development/ecommerce-integration-guide/)
-décrit ce parcours. Ce n'est pas un choix de prestataire déjà intégré au site.
-Il faut vérifier la couverture des cryptos retenues : Bitcoin est central dans
-BTCPay et Monero passe par un plugin ; les autres cryptos nécessitent une solution
-adaptée. Voir la [documentation des cryptos prises en charge](https://docs.btcpayserver.org/FAQ/Altcoin/).
+## Stockage et exploitation
 
-## Ce qu'il faut développer pour les commandes
+- PHP 64 bits, sessions et accès en écriture à `config/` sont nécessaires.
+- `config/orders.local.php` contient les commandes et données de contact. Un garde
+  PHP interdit sa lecture HTTP ; il est ignoré par Git. Sauvegarder ce fichier en privé.
+- Les écritures utilisent un verrou séparé et un remplacement atomique. Une corruption
+  bloque la lecture et les créations au lieu d'effacer les commandes.
+- Les jetons privés contiennent 256 bits aléatoires ; seul leur hash est stocké.
+  Conserver le lien est nécessaire : aucun renvoi par e-mail n'est implémenté.
+- Une limite de 20 créations par heure et par session limite les créations accidentelles.
+  Ce n'est pas une protection complète contre les abus distribués.
+- Les taux en ligne sont lus par le serveur auprès de CoinGecko. PHP doit pouvoir
+  accéder à HTTPS avec vérification des certificats. En cas d'échec, aucune commande
+  n'est créée et aucun taux fictif n'est utilisé. Les taux fixes restent disponibles.
+- La bibliothèque QR existante est fournie localement dans `vendor/`, avec sa licence.
+  La page de suivi ne charge aucun script externe et n'envoie pas son URL en Referer.
+- Le stockage fichier convient à une petite V1 ; prévoir une base et des limites
+  serveur adaptées avant une montée en charge.
 
-Une petite base de données (SQLite pour commencer) avec :
+## Limites restantes
 
-- Numéro de commande, e-mail de livraison, produit et copie du prix au moment de l'achat.
-- Devise, réseau, montant attendu, référence de facture ou TXID, dates et échéance.
-- Statut : en attente, en vérification, payée, livrée, expirée, annulée ou à examiner.
-- Historique des actions et des tentatives de livraison.
+La validation blockchain, l'envoi d'e-mails et la livraison de fichiers ne sont pas
+ automatisés. Il faut disposer des produits et effectuer ces opérations manuellement.
+Le mot de passe administrateur existant reste celui de la démo : le remplacer et
+configurer HTTPS avant exposition publique. Les conditions commerciales et la politique
+ de conservation des données restent à finaliser par l'exploitant.
 
-À la validation du panier, le serveur relit le catalogue et calcule lui-même les
-prix. Un changement du stockage local du navigateur ne doit pas modifier une commande.
-L'administration doit permettre de chercher une commande, la consulter, contrôler
-un paiement, valider/refuser et relancer une livraison. Le client doit pouvoir
-consulter son statut avec un lien privé difficile à deviner, sans compte obligatoire.
+## Vérification
 
-## Ce qu'il faut développer pour les fichiers
-
-1. Associer une archive réelle à chaque produit dans l'admin.
-2. Stocker les archives hors de l'accès public ; pas dans `media/`.
-3. Après validation du paiement, créer un lien de téléchargement individuel,
-   aléatoire, limité dans le temps et éventuellement en nombre de téléchargements.
-4. Envoyer ce lien par un service d'e-mail ou SMTP configuré côté serveur.
-5. Enregistrer l'envoi et les erreurs ; permettre une relance et une révocation.
-
-Le contrôle d'accès doit porter sur chaque téléchargement : connaître le chemin
-du fichier ou changer un numéro de commande ne doit pas suffire pour le récupérer.
-
-## Première version possible
-
-Pour commencer sans prestataire automatique : **création de commande → contrôle
-manuel du paiement dans l'admin → e-mail et lien de téléchargement sécurisé**.
-L'automatisation des paiements pourra ensuite remplacer la validation manuelle
-sans changer les commandes ni la livraison.
-
-Pour réaliser cette étape, il faudra disposer des archives à vendre, des adresses
-publiques réelles et d'un compte d'envoi d'e-mails. Pour l'option automatique,
-il faudra aussi choisir le prestataire/service et fournir ses accès côté serveur.
-L'hébergement doit exécuter PHP, accéder à une base et recevoir les notifications
-HTTPS ; GitHub Pages seul ne peut pas héberger ce backend PHP.
-
-## Vérifications réalisées sur les réglages
-
-`python tests/check_payments.py` teste sauvegarde et rechargement, activation des
-cryptos, devise par défaut, QR/montants issus des adresses configurées, taux fixes,
-taux en ligne simulés et panne, expiration et actualisation, formulaire périmé après
-modification, pièce jointe obligatoire, pause, refus CSRF, fichier corrompu, confidentialité
-des libellés et rendu à 320/375 px. Les tests restaurent la configuration de départ.
-Les requêtes d'envoi Formspree sont bloquées pendant les tests ; aucune n'a été tentée.
+`python tests/check_orders.py` lance un serveur PHP et Chrome dans une copie temporaire :
+création, prix serveur, arrondis, nouvelles tentatives, liens privés, CSRF, TXID dupliqué,
+référence après expiration, validation admin, livraison, panne de stockage et affichage
+à 320/375/1440 px. Aucune transaction ni notification externe n'est effectuée.
+`tests/check_submission.py` est un alias de cette suite.
+Les suites `check_demo.py`, `check_payments.py`, `check_ui.py` et `check_admin.py`
+complètent les contrôles sur le serveur local habituel.

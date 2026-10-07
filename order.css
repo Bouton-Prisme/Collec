@@ -1,0 +1,49 @@
+.tracking-page { margin:0; min-height:100vh; display:flex; flex-direction:column; font-family:Inter,system-ui,sans-serif; background:#0b101b; color:#ecf0fa; }
+.tracking-wrap { width:min(1060px,calc(100% - 32px)); margin:40px auto 64px; }
+.tracking-heading { display:flex; justify-content:space-between; align-items:center; gap:20px; flex-wrap:wrap; }
+.tracking-heading h1 { margin:8px 0 20px; overflow-wrap:anywhere; }
+.eyebrow,.muted { color:#a6b0c5; font-size:13px; line-height:1.6; }
+.status-badge { padding:10px 14px; border:1px solid #7369a2; border-radius:30px; background:#28233f; font-size:13px; }
+.status-badge[data-status="paid"],.status-badge[data-status="delivered"] { background:#17392e; border-color:#398a68; }
+.order-steps { display:grid; grid-template-columns:repeat(4,1fr); padding:0; list-style:none; gap:12px; margin:14px 0 28px; font-size:13px; color:#a6b0c5; }
+.order-steps li { border-top:3px solid #2b3549; padding-top:12px; }
+.order-steps .complete { color:#c9c1ff; border-color:#8979ff; }
+.tracking-grid { display:grid; grid-template-columns:minmax(0,1.55fr) minmax(0,1fr); gap:22px; align-items:start; }
+.tracking-card { padding:26px; background:#121a2b; border:1px solid #29344a; border-radius:16px; min-width:0; }
+.tracking-card h2 { font-size:19px; margin:0 0 14px; }
+.tracking-card h3 { font-size:22px; margin:20px 0; }
+.tracking-card p { font-size:14px; line-height:1.7; overflow-wrap:anywhere; }
+.tracking-card a { color:#c5bcff; }
+.tracking-card label { display:block; font-size:13px; margin:16px 0 8px; }
+.tracking-card input,.tracking-card textarea { box-sizing:border-box; width:100%; min-width:0; padding:12px; background:#0b111e; color:#ecf0fa; border:1px solid #46526c; border-radius:8px; font:inherit; font-size:13px; }
+.copy-row { display:flex; gap:8px; }
+.copy-row input { flex:1; font-family:monospace; }
+.copy-row button { flex-shrink:0; }
+.network-label,.review-delay,.merchant-note,.reference-box { background:#1c253a; padding:14px; border-radius:10px; }
+.reference-form { margin-top:26px; padding-top:24px; border-top:1px solid #303c53; }
+.reference-form button { margin-top:18px; }
+.order-recap dl { display:grid; grid-template-columns:auto minmax(0,1fr); gap:14px; font-size:14px; }
+.order-recap dt { color:#a6b0c5; }
+.order-recap dd { margin:0; text-align:right; overflow-wrap:anywhere; }
+.order-recap hr { border:0; border-top:1px solid #303c53; margin:24px 0; }
+.order-recap .ui-button { margin:6px 0; width:100%; box-sizing:border-box; }
+.order-alert,.demo-banner { padding:16px; border:1px solid #8b7245; background:#30271a; color:#ffe0a6; border-radius:10px; line-height:1.6; }
+.support-link { display:block; margin-top:22px; }
+#order-qr { background:#fff; padding:16px; width:180px; margin:18px 0; border-radius:10px; }
+#order-qr img { max-width:100%; }
+.checkout-contact { margin-top:22px; }
+.checkout-contact input { width:100%; box-sizing:border-box; padding:13px; background:#0b111e; border:1px solid #46526c; border-radius:8px; color:#fff; margin-top:8px; }
+.checkout-contact p { font-size:13px; color:#a6b0c5; line-height:1.6; }
+.orders-admin { display:grid; gap:20px; min-width:0; }
+.orders-admin > * { min-width:0; max-width:100%; box-sizing:border-box; }
+.orders-admin input:not([type="checkbox"]),.orders-admin select,.orders-admin textarea { width:100%; min-width:0; max-width:100%; box-sizing:border-box; padding:10px; background:#0b111e; color:#ecf0fa; border:1px solid #46526c; border-radius:8px; font:inherit; }
+.orders-admin .order-admin-card { padding:22px; overflow-wrap:anywhere; }
+.orders-admin dl { display:grid; grid-template-columns:160px minmax(0,1fr); gap:10px; }
+.orders-admin dd { margin:0; overflow-wrap:anywhere; }
+.orders-admin label { display:block; margin:14px 0; }
+.orders-admin input[type="checkbox"] { width:auto; }
+.orders-admin summary { cursor:pointer; font-weight:600; line-height:1.8; }
+.orders-admin h3 { margin-top:22px; }
+@media(max-width:700px) { .tracking-grid { grid-template-columns:1fr; } .tracking-wrap { margin-top:24px; } .tracking-card { padding:20px; } .order-steps { grid-template-columns:1fr 1fr; gap:18px; } .tracking-heading h1 { font-size:22px; } .orders-admin dl { grid-template-columns:1fr; } }
+@media(max-width:380px) { .copy-row { flex-direction:column; } .tracking-card { padding:16px; } .order-recap dl { grid-template-columns:1fr; gap:8px; } .order-recap dd { text-align:left; margin-bottom:6px; } }
+@media(max-width:560px) { .sidebar nav { display:grid; grid-template-columns:1fr 1fr; } }

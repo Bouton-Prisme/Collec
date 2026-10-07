@@ -22,19 +22,35 @@ Ruby (49 USD) et Diamond (75 USD). Leurs fichiers téléchargeables ne sont pas 
 Les illustrations des emballages sont dans `media/packs/`, accessibles dans la médiathèque.
 
 Connexion admin : mot de passe local actuel `admin`.
+Le menu latéral propose **Products**, **Payments**, **Commandes** et **Roulette**.
+Dans **Products**, créez un produit avec le formulaire, ou cliquez sur **Éditer**
+puis **Enregistrer le produit** pour le modifier. Les images peuvent être choisies
+dans la médiathèque ou importées (PNG, JPG, WEBP, jusqu'à 5 Mo).
+Le lien de paiement facultatif remplace le bouton de sélection de la boutique ;
+laissez-le vide pour conserver le parcours de paiement habituel.
+
 Dans **Ordre d'affichage**, le plus petit nombre apparaît en premier.
-Cliquez sur **Save products**, puis rechargez l'accueil ou le paiement.
+Glissez la poignée d'un produit pour changer sa position : l'ordre est enregistré
+automatiquement. La poignée fonctionne aussi au toucher et avec les flèches haut/bas
+du clavier. Effacez la recherche et choisissez le tri **Ordre d'affichage** pour déplacer.
+Le bouton **Actif / Inactif** masque ou réaffiche immédiatement le produit lors du
+prochain chargement de l'accueil ou du paiement. Recherche et tri ne modifient pas
+l'ordre enregistré.
 En cas d'égalité, l'identifiant du produit départage les positions.
 L'ordre ne modifie pas les identifiants ni les liens existants.
 
-Parcours conseillé : accueil → Select → choix BTC/ETH/XMR → Continue demo →
-saisir un e-mail fictif et un TXID fictif → Simulate submission.
-Le mode démo (onglet **Paiements** de l'administration) utilise des taux illustratifs
-fixes et des adresses fictives. Le formulaire simule l'envoi, sans contacter Formspree.
-Il n'effectue aucun paiement et ne livre aucun fichier.
+Parcours conseillé : accueil → Select → choix BTC/ETH/XMR → e-mail fictif →
+Create demo order → conserver le lien privé → TXID fictif → Save demo reference.
+Le mode démo (onglet **Payments** de l'administration) utilise des taux illustratifs
+fixes et des adresses fictives. La commande de test et sa référence sont enregistrées
+sur le site, sans contacter Formspree. Aucun paiement, e-mail ou fichier n'est envoyé.
+Dans **Commandes**, vérifier les informations, changer le statut et laisser un message
+visible par le client sur sa page de suivi. Les paiements et livraisons restent manuels.
 
-Une connexion Internet reste nécessaire pour Tailwind et la bibliothèque QR code.
-Voir `AUDIT-DEMO.md` pour les tests réalisés et les éléments restant à développer.
+Une connexion Internet reste nécessaire pour Tailwind sur les pages existantes.
+Le QR code de la page de suivi est fourni localement.
+Voir `PAIEMENTS-ET-COMMANDES.md` pour le parcours et les tests actuels ;
+`AUDIT-DEMO.md` conserve l'historique de la démonstration du 1er octobre.
 Choisir le mode manuel ne suffit pas à automatiser les paiements ou la livraison.
 
 ## Réglages de paiement
@@ -46,14 +62,12 @@ Ouvrir `http://127.0.0.1:8080/admin.php?tab=payment`.
 - Donner un nom interne à chaque portefeuille et renseigner son adresse publique.
   Les réseaux pris en charge sont Bitcoin mainnet, Ethereum mainnet et Monero mainnet.
 - Régler la durée du montant affiché, les taux fixes ou les taux CoinGecko.
-- Définir l'e-mail de support, l'identifiant Formspree, les instructions, le délai
-  de traitement et l'obligation d'une pièce jointe en plus du TXID.
+- Définir l'e-mail de support, les instructions et le délai de traitement manuel.
 
 En démo, les adresses affichées sont fictives même si des adresses réelles sont
-enregistrées. Aucun formulaire n'est envoyé. En mode manuel, les adresses des cryptos
-actives et un identifiant Formspree sont nécessaires. Le destinataire des justificatifs
-se règle dans le compte Formspree, pas dans le champ « e-mail du support ».
-L'acceptation des pièces jointes dépend de la configuration de ce compte.
+enregistrées. En mode manuel, renseigner les adresses des cryptos actives ;
+aucun compte Formspree n'est nécessaire. Les références restent dans les commandes.
+L'e-mail de support sert au contact client, sans envoi automatique de notification.
 
 La configuration est enregistrée dans `config/payment.local.php`, protégé contre
 l'accès HTTP et **exclu de Git**. Faire une sauvegarde privée de ce fichier et le
@@ -61,9 +75,11 @@ reconfigurer sur chaque serveur. `payment-config.php` ne publie que les paramèt
 nécessaires aux visiteurs ; les noms internes de comptes ne sont pas exposés.
 Ne jamais saisir de clé privée de portefeuille ou de phrase de récupération.
 
-Les réglages sont relus à chaque chargement ; le formulaire recontrôle leur version
-avant l'envoi. Une configuration modifiée ou un montant expiré oblige à revenir au
-paiement. Ces contrôles dans le navigateur ne remplacent pas une facture serveur.
+Les commandes conservent leur prix, montant crypto, adresse, échéance et délai annoncés
+au moment de leur création côté serveur. Un montant expiré ne doit plus être payé,
+mais le client peut encore déclarer un transfert déjà effectué pour vérification.
+Les données de commande sont dans `config/orders.local.php`, protégées par PHP et
+exclues de Git. Les sauvegarder en privé avec la configuration.
 
 ## Dépôt GitHub
 

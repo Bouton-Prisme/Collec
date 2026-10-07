@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once __DIR__ . '/payment-settings.php';
+require_once __DIR__ . '/orders.php';
 if (empty($_SESSION['csrf_token'])) $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 
 $adminPassword = 'admin';
@@ -90,7 +91,13 @@ function product_from_form($product) {
         throw new InvalidArgumentException('Enter a product name, a non-negative price and a display order between 1 and 1000000.');
     }
 
+    $paymentUrl = trim((string) ($product['payment_url'] ?? ''));
+    if ($paymentUrl !== '' && (!filter_var($paymentUrl, FILTER_VALIDATE_URL) || !in_array(strtolower(parse_url($paymentUrl, PHP_URL_SCHEME) ?? ''), ['https', 'http'], true))) {
+        throw new InvalidArgumentException('Le lien de paiement doit être une URL HTTP ou HTTPS valide.');
+    }
     return [
+        'active' => !isset($product['active']) || in_array($product['active'], [true, 1, '1'], true),
+        'payment_url' => $paymentUrl,
         'name' => $name,
         'usd' => (float) $price,
         'sort_order' => $order,
@@ -181,13 +188,66 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password'])) {
 $isAdmin = !empty($_SESSION['admin']);
 $data = load_products($productsFile);
 $mediaLibrary = $isAdmin ? scan_media_library($mediaDir) : [];
-$activeTab = in_array($_GET['tab'] ?? '', ['roulette', 'payment'], true) ? $_GET['tab'] : 'products';
+$activeTab = in_array($_GET['tab'] ?? '', ['roulette', 'payment', 'orders'], true) ? $_GET['tab'] : 'products';
 
+$isApi = $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']);
+if ($isApi && !$isAdmin) {
+    http_response_code(401);
+    header('Content-Type: application/json');
+    echo json_encode(['error' => 'Session expirée. Reconnectez-vous.']);
+    exit;
+}
 try {
 if ($isAdmin && $_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!is_string($_POST['csrf_token'] ?? null) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
         throw new InvalidArgumentException('Session du formulaire expirée. Rechargez la page puis réessayez.');
     }
+}
+if ($isApi) {
+    $action = $_POST['action'];
+    $next = $data;
+    $result = ['ok' => true];
+    if ($action === 'toggle') {
+        $id = (string) ($_POST['id'] ?? '');
+        if (!isset($next['products'][$id])) throw new InvalidArgumentException('Produit introuvable.');
+        $next['products'][$id]['active'] = ($_POST['active'] ?? '') === '1';
+    } elseif ($action === 'reorder') {
+        $ids = json_decode($_POST['ids'] ?? '', true);
+        $expected = array_map('strval', array_keys($next['products']));
+        if (!is_array($ids) || array_filter($ids, function ($id) { return !is_string($id); }) || count($ids) !== count($expected) || count(array_unique($ids)) !== count($expected) || array_diff($ids, $expected)) {
+            throw new InvalidArgumentException('La liste a changé. Rechargez la page avant de réordonner les produits.');
+        }
+        foreach ($ids as $position => $id) $next['products'][$id]['sort_order'] = $position + 1;
+    } elseif ($action === 'upload') {
+        $file = $_FILES['image'] ?? null;
+        if (!$file || $file['error'] !== UPLOAD_ERR_OK || $file['size'] > 5 * 1024 * 1024) throw new InvalidArgumentException('Choisissez une image de moins de 5 Mo.');
+        $info = @getimagesize($file['tmp_name']);
+        $extension = ['image/png' => 'png', 'image/jpeg' => 'jpg', 'image/webp' => 'webp'][$info['mime'] ?? ''] ?? null;
+        if (!$extension) throw new InvalidArgumentException('Formats acceptés : PNG, JPG et WEBP.');
+        $uploadDir = $mediaDir . '/uploads';
+        if (!is_dir($uploadDir) && !mkdir($uploadDir, 0755, true)) throw new RuntimeException('Impossible de créer le dossier des images.');
+        $src = 'media/uploads/' . bin2hex(random_bytes(16)) . '.' . $extension;
+        if (!move_uploaded_file($file['tmp_name'], __DIR__ . '/' . $src)) throw new RuntimeException('Impossible d’enregistrer l’image.');
+        $result['src'] = $src;
+    } else {
+        throw new InvalidArgumentException('Action inconnue.');
+    }
+    if ($action !== 'upload' && !save_products($productsFile, $next)) throw new RuntimeException('Impossible d’enregistrer les produits.');
+    header('Content-Type: application/json');
+    echo json_encode($result);
+    exit;
+}
+if ($isAdmin && $_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['update_product'])) {
+    $id = (string) $_POST['update_product'];
+    if (!isset($data['products'][$id])) throw new InvalidArgumentException('Produit introuvable.');
+    $updated = product_from_form($_POST['new_product'] ?? []);
+    $data['products'][$id] = array_replace($data['products'][$id], $updated);
+    if (!save_products($productsFile, $data)) throw new RuntimeException('Impossible d’enregistrer le produit.');
+    $saved = true;
+}
+if ($isAdmin && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_order'])) {
+    order_admin_update($_POST);
+    $saved = true;
 }
 if ($isAdmin && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_payment'])) {
     $nextSettings = validate_payment_settings($_POST['payment'] ?? []);
@@ -231,29 +291,6 @@ if ($isAdmin && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_pr
     }
 }
 
-if ($isAdmin && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['products']) && !isset($_POST['delete_product'])) {
-    $next = $data;
-    $next['products'] = [];
-
-    foreach ($_POST['products'] as $id => $product) {
-        $id = preg_replace('/[^0-9]/', '', (string) $id);
-        if ($id === '') {
-            continue;
-        }
-
-        $next['products'][$id] = product_from_form($product);
-    }
-
-    ksort($next['products'], SORT_NATURAL);
-
-    if (!save_products($productsFile, $next)) {
-        $error = 'Could not save products.json. Check file permissions.';
-    } else {
-        $saved = true;
-        $data = $next;
-    }
-}
-
 if ($isAdmin && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_roulette'])) {
     $data['roulette']['media'] = media_from_form($_POST['roulette']['media'] ?? '', 'Roulette');
 
@@ -264,7 +301,28 @@ if ($isAdmin && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_roul
     }
 }
 } catch (InvalidArgumentException | RuntimeException $exception) {
+    if ($isApi) {
+        http_response_code(400);
+        header('Content-Type: application/json');
+        echo json_encode(['error' => $exception->getMessage()]);
+        exit;
+    }
     $error = $exception->getMessage();
+}
+
+// Redirect successful form submissions so refreshing cannot create a duplicate.
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error && ($saved || $added || $deleted || $paymentSaved)) {
+    $_SESSION['admin_notice'] = $paymentSaved ? 'payment' : ($added ? 'added' : ($deleted ? 'deleted' : 'saved'));
+    header('Location: admin.php?tab=' . $activeTab, true, 303);
+    exit;
+}
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_SESSION['admin_notice'])) {
+    $notice = $_SESSION['admin_notice'];
+    unset($_SESSION['admin_notice']);
+    $saved = $notice === 'saved';
+    $added = $notice === 'added';
+    $deleted = $notice === 'deleted';
+    $paymentSaved = $notice === 'payment';
 }
 
 // Display order is independent of product IDs (which are used by carts and URLs).
@@ -279,396 +337,4 @@ foreach ($data['products'] as $id => $product) {
 }
 $nextOrder = min(1000000, $nextOrder);
 ?>
-<!DOCTYPE html>
-<html lang="en" class="dark">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Administration — BitShop</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config = { darkMode: 'class' };</script>
-</head>
-<body class="min-h-screen bg-[#0b0c10] text-white">
-  <main class="mx-auto max-w-6xl px-4 py-8">
-    <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
-      <div>
-        <h1 class="text-2xl font-bold">Administration BitShop</h1>
-        <p class="mt-1 text-sm text-gray-400">Produits, médiathèque et paramètres de paiement.</p>
-      </div>
-      <?php if ($isAdmin): ?>
-        <div class="flex items-center gap-3">
-          <a href="home.html" class="rounded border border-white/20 px-3 py-2 text-sm hover:bg-white hover:text-black">Home</a>
-          <a href="admin.php?logout=1" class="rounded border border-white/20 px-3 py-2 text-sm hover:bg-white hover:text-black">Logout</a>
-        </div>
-      <?php endif; ?>
-    </div>
-
-    <?php if ($error): ?>
-      <div class="mb-6 rounded border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-200"><?= h($error) ?></div>
-    <?php endif; ?>
-
-    <?php if ($saved): ?>
-      <div class="mb-6 rounded border border-emerald-500/40 bg-emerald-500/10 p-3 text-sm text-emerald-200">Products saved.</div>
-    <?php endif; ?>
-
-    <?php if ($paymentSaved): ?>
-      <div role="status" class="mb-6 rounded border border-emerald-500/40 bg-emerald-500/10 p-3 text-sm text-emerald-200">Configuration de paiement enregistrée.</div>
-    <?php endif; ?>
-
-    <?php if ($added): ?>
-      <div class="mb-6 rounded border border-emerald-500/40 bg-emerald-500/10 p-3 text-sm text-emerald-200">Product added.</div>
-    <?php endif; ?>
-
-    <?php if ($deleted): ?>
-      <div class="mb-6 rounded border border-emerald-500/40 bg-emerald-500/10 p-3 text-sm text-emerald-200">Product deleted.</div>
-    <?php endif; ?>
-
-    <?php if (!$isAdmin): ?>
-      <form method="post" class="max-w-sm rounded border border-white/10 bg-white/5 p-5">
-        <label class="block text-sm font-semibold" for="password">Password</label>
-        <input id="password" name="password" type="password" class="mt-2 w-full rounded border border-white/10 bg-black px-3 py-2 text-white" required>
-        <button class="mt-4 rounded bg-cyan-950 px-4 py-2 font-bold text-white hover:opacity-90">Login</button>
-      </form>
-    <?php else: ?>
-      <nav class="mb-6 flex gap-2 border-b border-white/10">
-        <a href="admin.php?tab=products" class="border-b-2 px-4 py-3 text-sm font-semibold <?= $activeTab === 'products' ? 'border-cyan-300 text-white' : 'border-transparent text-gray-400 hover:text-white' ?>">Products</a>
-        <a href="admin.php?tab=roulette" class="border-b-2 px-4 py-3 text-sm font-semibold <?= $activeTab === 'roulette' ? 'border-cyan-300 text-white' : 'border-transparent text-gray-400 hover:text-white' ?>">Roulette</a>
-        <a href="admin.php?tab=payment" class="border-b-2 px-4 py-3 text-sm font-semibold <?= $activeTab === 'payment' ? 'border-cyan-300 text-white' : 'border-transparent text-gray-400 hover:text-white' ?>">Paiements</a>
-      </nav>
-
-      <?php if ($activeTab === 'products'): ?>
-      <section class="mb-8 rounded border border-indigo-500/10 bg-indigo-500 p-3">
-        <h2 class="mb-4 text-lg font-semibold">Add product</h2>
-        <form method="post" class="grid gap-4 md:grid-cols-2">
-          <input type="hidden" name="csrf_token" value="<?= h($_SESSION['csrf_token']) ?>">
-          <input type="hidden" name="add_product" value="1">
-          <label class="block text-sm">
-            <span class="font-semibold">Name</span>
-            <input name="new_product[name]" class="mt-1 w-full rounded border border-white/10 bg-black px-3 py-2 text-white" required>
-          </label>
-          <label class="block text-sm">
-            <span class="font-semibold">USD price</span>
-            <input name="new_product[usd]" type="number" step="0.01" value="0" class="mt-1 w-full rounded border border-white/10 bg-black px-3 py-2 text-white">
-          </label>
-          <label class="block text-sm">
-            <span class="font-semibold">Ordre d'affichage</span>
-            <input name="new_product[sort_order]" type="number" min="1" max="1000000" step="1" value="<?= h($nextOrder) ?>" required class="mt-1 w-full rounded border border-white/10 bg-black px-3 py-2 text-white">
-            <span class="mt-1 block text-xs text-gray-300">Le plus petit nombre s'affiche en premier. En cas d'égalité, l'identifiant départage les produits.</span>
-          </label>
-          <label class="block text-sm">
-            <span class="font-semibold">Badge</span>
-            <input name="new_product[badge]" class="mt-1 w-full rounded border border-white/10 bg-black px-3 py-2 text-white">
-          </label>
-          <label class="block text-sm">
-            <span class="font-semibold">Payment tagline</span>
-            <input name="new_product[tagline]" class="mt-1 w-full rounded border border-white/10 bg-black px-3 py-2 text-white">
-          </label>
-          <label class="block text-sm md:col-span-2">
-            <span class="font-semibold">Home description</span>
-            <textarea name="new_product[description]" rows="3" class="mt-1 w-full rounded border border-white/10 bg-black px-3 py-2 text-white"></textarea>
-          </label>
-          <div class="block text-sm md:col-span-2">
-            <div class="flex flex-wrap items-center justify-between gap-3">
-              <span class="font-semibold">Images</span>
-              <button type="button" class="rounded border border-white/20 px-3 py-2 text-sm hover:bg-white hover:text-black" data-open-library data-target="new-product-media">Open library</button>
-            </div>
-            <textarea id="new-product-media" name="new_product[media]" rows="3" class="sr-only" data-media-field></textarea>
-            <div class="mt-2 min-h-24 rounded border border-white/10 bg-black/50 p-3" data-media-preview data-empty="No selected images."></div>
-          </div>
-          <div class="md:col-span-2">
-            <button class="rounded bg-cyan-950 px-5 py-3 font-bold text-white hover:opacity-90">Add product</button>
-          </div>
-        </form>
-      </section>
-
-      <form method="post" class="space-y-5">
-        <input type="hidden" name="csrf_token" value="<?= h($_SESSION['csrf_token']) ?>">
-        <?php foreach ($data['products'] as $id => $product): ?>
-          <?php
-            $media = [];
-            foreach (($product['media'] ?? []) as $item) {
-                $media[] = is_array($item) ? (string) ($item['src'] ?? '') : (string) $item;
-            }
-          ?>
-          <section class="rounded border border-white/10 bg-white/5 p-5">
-            <div class="mb-4 flex items-center justify-between gap-4">
-              <h2 class="text-lg font-semibold">Product <?= h($id) ?></h2>
-              <button
-                name="delete_product"
-                value="<?= h($id) ?>"
-                class="rounded border border-red-500/50 px-3 py-2 text-sm text-red-200 hover:bg-red-500 hover:text-white"
-                onclick="return confirm('Delete product <?= h($id) ?>?');">
-                Delete
-              </button>
-            </div>
-            <div class="grid gap-4 md:grid-cols-2">
-              <label class="block text-sm">
-                <span class="font-semibold">Name</span>
-                <input name="products[<?= h($id) ?>][name]" value="<?= h($product['name'] ?? '') ?>" class="mt-1 w-full rounded border border-white/10 bg-black px-3 py-2 text-white">
-              </label>
-              <label class="block text-sm">
-                <span class="font-semibold">USD price</span>
-                <input name="products[<?= h($id) ?>][usd]" type="number" step="0.01" value="<?= h($product['usd'] ?? 0) ?>" class="mt-1 w-full rounded border border-white/10 bg-black px-3 py-2 text-white">
-              </label>
-              <label class="block text-sm">
-                <span class="font-semibold">Ordre d'affichage</span>
-                <input name="products[<?= h($id) ?>][sort_order]" type="number" min="1" max="1000000" step="1" value="<?= h($product['sort_order'] ?? $id) ?>" required class="mt-1 w-full rounded border border-white/10 bg-black px-3 py-2 text-white">
-                <span class="mt-1 block text-xs text-gray-400">Le plus petit nombre s'affiche en premier sur l'accueil et le paiement.</span>
-              </label>
-              <label class="block text-sm">
-                <span class="font-semibold">Badge</span>
-                <input name="products[<?= h($id) ?>][badge]" value="<?= h($product['badge'] ?? '') ?>" class="mt-1 w-full rounded border border-white/10 bg-black px-3 py-2 text-white">
-              </label>
-              <label class="block text-sm">
-                <span class="font-semibold">Payment tagline</span>
-                <input name="products[<?= h($id) ?>][tagline]" value="<?= h($product['tagline'] ?? '') ?>" class="mt-1 w-full rounded border border-white/10 bg-black px-3 py-2 text-white">
-              </label>
-              <label class="block text-sm md:col-span-2">
-                <span class="font-semibold">Home description</span>
-                <textarea name="products[<?= h($id) ?>][description]" rows="3" class="mt-1 w-full rounded border border-white/10 bg-black px-3 py-2 text-white"><?= h($product['description'] ?? '') ?></textarea>
-              </label>
-              <div class="block text-sm md:col-span-2">
-                <div class="flex flex-wrap items-center justify-between gap-3">
-                  <span class="font-semibold">Images</span>
-                  <button type="button" class="rounded border border-white/20 px-3 py-2 text-sm hover:bg-white hover:text-black" data-open-library data-target="product-<?= h($id) ?>-media">Open library</button>
-                </div>
-                <textarea id="product-<?= h($id) ?>-media" name="products[<?= h($id) ?>][media]" rows="3" class="sr-only" data-media-field><?= h(implode("\n", $media)) ?></textarea>
-                <div class="mt-2 min-h-24 rounded border border-white/10 bg-black/50 p-3" data-media-preview data-empty="No selected images."></div>
-              </div>
-            </div>
-          </section>
-        <?php endforeach; ?>
-
-        <div class="sticky bottom-0 border-t border-white/10 bg-[#0b0c10]/95 py-4 backdrop-blur">
-          <button class="rounded bg-cyan-950 px-5 py-3 font-bold text-white hover:opacity-90">Save products</button>
-          <a href="home.html" class="ml-3 text-sm text-gray-300 hover:text-white">View home</a>
-        </div>
-      </form>
-      <?php elseif ($activeTab === 'payment'): ?>
-        <?php require __DIR__ . '/admin-payment.php'; ?>
-      <?php else: ?>
-        <?php $rouletteMedia = media_src_list($data['roulette']['media'] ?? []); ?>
-        <form method="post" class="space-y-5">
-          <input type="hidden" name="csrf_token" value="<?= h($_SESSION['csrf_token']) ?>">
-          <input type="hidden" name="save_roulette" value="1">
-          <section class="rounded border border-white/10 bg-white/5 p-5">
-            <div class="mb-4 flex items-center justify-between gap-4">
-              <div>
-                <h2 class="text-lg font-semibold">Roulette media</h2>
-                <p class="mt-1 text-sm text-gray-400">Images used by roulette.html for random selection.</p>
-              </div>
-              <a href="roulette.html" class="rounded border border-white/20 px-3 py-2 text-sm hover:bg-white hover:text-black">View roulette</a>
-            </div>
-            <div class="block text-sm">
-              <div class="flex flex-wrap items-center justify-between gap-3">
-                <span class="font-semibold">Images</span>
-                <button type="button" class="rounded border border-white/20 px-3 py-2 text-sm hover:bg-white hover:text-black" data-open-library data-target="roulette-media">Open library</button>
-              </div>
-              <textarea id="roulette-media" name="roulette[media]" rows="3" class="sr-only" data-media-field><?= h(implode("\n", $rouletteMedia)) ?></textarea>
-              <div class="mt-2 min-h-24 rounded border border-white/10 bg-black/50 p-3" data-media-preview data-empty="No selected images."></div>
-            </div>
-          </section>
-
-          <div class="sticky bottom-0 border-t border-white/10 bg-[#0b0c10]/95 py-4 backdrop-blur">
-            <button class="rounded bg-cyan-950 px-5 py-3 font-bold text-white hover:opacity-90">Save roulette</button>
-          </div>
-        </form>
-      <?php endif; ?>
-
-      <div class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 p-4" data-library-modal aria-hidden="true">
-        <div class="flex max-h-[90vh] w-full max-w-5xl flex-col rounded border border-white/10 bg-[#101218] shadow-2xl">
-          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 p-4">
-            <div>
-              <h2 class="text-lg font-semibold">Media library</h2>
-              <p class="mt-1 text-sm text-gray-400">Drop image folders in <code class="rounded bg-black px-1 py-0.5">media/</code>, then select the images for this product.</p>
-            </div>
-            <button type="button" class="rounded border border-white/20 px-3 py-2 text-sm hover:bg-white hover:text-black" data-close-library>Close</button>
-          </div>
-
-          <div class="flex flex-wrap items-center gap-3 border-b border-white/10 p-4">
-            <input type="search" placeholder="Search images" class="min-w-56 flex-1 rounded border border-white/10 bg-black px-3 py-2 text-sm text-white" data-library-search>
-            <button type="button" class="rounded border border-white/20 px-3 py-2 text-sm hover:bg-white hover:text-black" data-library-select-all>Select visible</button>
-            <button type="button" class="rounded border border-white/20 px-3 py-2 text-sm hover:bg-white hover:text-black" data-library-clear>Clear</button>
-            <span class="text-sm text-gray-400" data-library-count></span>
-          </div>
-
-          <div class="min-h-72 overflow-y-auto p-4">
-            <?php if (empty($mediaLibrary)): ?>
-              <div class="rounded border border-dashed border-white/20 p-8 text-center text-sm text-gray-300">
-                No images found. Create folders inside <code class="rounded bg-black px-1 py-0.5">media/</code> and add PNG, JPG, WEBP, GIF, AVIF or SVG files.
-              </div>
-            <?php else: ?>
-              <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5" data-library-grid>
-                <?php foreach ($mediaLibrary as $image): ?>
-                  <label class="group cursor-pointer rounded border border-white/10 bg-black/40 p-2 hover:border-cyan-300" data-library-item data-src="<?= h($image['src']) ?>">
-                    <div class="relative aspect-square overflow-hidden rounded bg-white/5">
-                      <img src="<?= h($image['src']) ?>" alt="<?= h($image['name']) ?>" loading="lazy" class="h-full w-full object-cover">
-                      <input type="checkbox" value="<?= h($image['src']) ?>" class="absolute left-2 top-2 h-5 w-5 accent-cyan-400" data-library-checkbox>
-                    </div>
-                    <div class="mt-2 truncate text-xs font-semibold text-white" title="<?= h($image['name']) ?>"><?= h($image['name']) ?></div>
-                    <div class="truncate text-xs text-gray-400" title="<?= h($image['folder']) ?>"><?= h($image['folder']) ?></div>
-                  </label>
-                <?php endforeach; ?>
-              </div>
-            <?php endif; ?>
-          </div>
-
-          <div class="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 p-4">
-            <span class="text-sm text-gray-400">Checked images are selected for import.</span>
-            <button type="button" class="rounded bg-cyan-950 px-5 py-3 font-bold text-white hover:opacity-90" data-apply-library>Use selected images</button>
-          </div>
-        </div>
-      </div>
-    <?php endif; ?>
-  </main>
-  <?php if ($isAdmin): ?>
-    <script>
-      const mediaLibrary = <?= json_encode($mediaLibrary, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
-
-      (() => {
-        const modal = document.querySelector('[data-library-modal]');
-        const search = document.querySelector('[data-library-search]');
-        const count = document.querySelector('[data-library-count]');
-        const items = Array.from(document.querySelectorAll('[data-library-item]'));
-        const checkboxes = Array.from(document.querySelectorAll('[data-library-checkbox]'));
-        let activeField = null;
-
-        const selectedFromField = (field) => field.value
-          .split(/\r?\n/)
-          .map((value) => value.trim())
-          .filter(Boolean);
-
-        const writeField = (field, values) => {
-          field.value = values.join('\n');
-          renderPreview(field);
-        };
-
-        const renderPreview = (field) => {
-          const preview = field.parentElement.querySelector('[data-media-preview]');
-          const values = selectedFromField(field);
-
-          if (!preview) return;
-          if (!values.length) {
-            preview.innerHTML = `<p class="text-sm text-gray-400">${preview.dataset.empty}</p>`;
-            return;
-          }
-
-          preview.innerHTML = `
-            <div class="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6">
-              ${values.map((src) => `
-                <figure class="overflow-hidden rounded border border-white/10 bg-black">
-                  <div class="relative aspect-square bg-white/5">
-                    <img src="${escapeAttribute(src)}" alt="" loading="lazy" class="h-full w-full object-cover">
-                    <button type="button" class="absolute right-1 top-1 grid h-7 w-7 place-items-center rounded-full bg-black/80 text-sm font-bold text-white hover:bg-red-600" data-remove-media="${escapeAttribute(src)}" aria-label="Remove ${escapeAttribute(src)}">x</button>
-                  </div>
-                  <figcaption class="truncate px-2 py-1 text-xs text-gray-300" title="${escapeAttribute(src)}">${escapeHtml(src.split('/').pop() || src)}</figcaption>
-                </figure>
-              `).join('')}
-            </div>
-          `;
-        };
-
-        const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (char) => ({
-          '&': '&amp;',
-          '<': '&lt;',
-          '>': '&gt;',
-          '"': '&quot;',
-          "'": '&#039;'
-        }[char]));
-
-        const escapeAttribute = escapeHtml;
-
-        const updateCount = () => {
-          if (!count) return;
-          const selected = checkboxes.filter((checkbox) => checkbox.checked).length;
-          count.textContent = `${selected} selected`;
-        };
-
-        const openLibrary = (field) => {
-          activeField = field;
-          const selected = new Set(selectedFromField(field));
-          checkboxes.forEach((checkbox) => {
-            checkbox.checked = selected.has(checkbox.value);
-          });
-          if (search) search.value = '';
-          filterItems('');
-          updateCount();
-          modal.classList.remove('hidden');
-          modal.classList.add('flex');
-          modal.setAttribute('aria-hidden', 'false');
-        };
-
-        const closeLibrary = () => {
-          modal.classList.add('hidden');
-          modal.classList.remove('flex');
-          modal.setAttribute('aria-hidden', 'true');
-          activeField = null;
-        };
-
-        const filterItems = (query) => {
-          const term = query.trim().toLowerCase();
-          items.forEach((item) => {
-            item.classList.toggle('hidden', term !== '' && !item.dataset.src.toLowerCase().includes(term));
-          });
-        };
-
-        document.querySelectorAll('[data-media-field]').forEach(renderPreview);
-
-        document.querySelectorAll('[data-media-preview]').forEach((preview) => {
-          preview.addEventListener('click', (event) => {
-            const removeButton = event.target.closest('[data-remove-media]');
-            if (!removeButton) return;
-
-            const field = preview.parentElement.querySelector('[data-media-field]');
-            if (!field) return;
-
-            writeField(field, selectedFromField(field).filter((src) => src !== removeButton.dataset.removeMedia));
-          });
-        });
-
-        document.querySelectorAll('[data-open-library]').forEach((button) => {
-          button.addEventListener('click', () => {
-            const field = document.getElementById(button.dataset.target);
-            if (field) openLibrary(field);
-          });
-        });
-
-        document.querySelector('[data-close-library]')?.addEventListener('click', closeLibrary);
-        modal?.addEventListener('click', (event) => {
-          if (event.target === modal) closeLibrary();
-        });
-
-        search?.addEventListener('input', () => filterItems(search.value));
-        checkboxes.forEach((checkbox) => checkbox.addEventListener('change', updateCount));
-
-        document.querySelector('[data-library-select-all]')?.addEventListener('click', () => {
-          items.filter((item) => !item.classList.contains('hidden')).forEach((item) => {
-            const checkbox = item.querySelector('[data-library-checkbox]');
-            if (checkbox) checkbox.checked = true;
-          });
-          updateCount();
-        });
-
-        document.querySelector('[data-library-clear]')?.addEventListener('click', () => {
-          checkboxes.forEach((checkbox) => {
-            checkbox.checked = false;
-          });
-          updateCount();
-        });
-
-        document.querySelector('[data-apply-library]')?.addEventListener('click', () => {
-          if (!activeField) return;
-          writeField(activeField, checkboxes.filter((checkbox) => checkbox.checked).map((checkbox) => checkbox.value));
-          closeLibrary();
-        });
-
-        document.addEventListener('keydown', (event) => {
-          if (event.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
-            closeLibrary();
-          }
-        });
-      })();
-    </script>
-  <?php endif; ?>
-</body>
-</html>
+<?php require __DIR__ . '/admin-view.php'; ?>

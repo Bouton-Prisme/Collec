@@ -6,13 +6,15 @@
             "sort_order": 2,
             "badge": "Essentials",
             "description": "30 digital illustrations covering abstract shapes and soft textures. A compact collection for refreshing your screens and personal projects.",
-            "tagline": "30 illustrations · Abstracts + textures · Personal use",
+            "tagline": "30 illustrations \u00b7 Abstracts + textures \u00b7 Personal use",
             "media": [
                 {
-                    "src": "media/packs/Pack2.png",
+                    "src": "media/uploads/a19a2aa33d17fa638199db5e3b9b83c8.png",
                     "alt": "Bronze Pack image"
                 }
-            ]
+            ],
+            "active": true,
+            "payment_url": ""
         },
         "3": {
             "name": "Silver Pack",
@@ -20,13 +22,15 @@
             "sort_order": 3,
             "badge": "Collection",
             "description": "60 digital illustrations with dreamlike landscapes, botanical scenes and abstract art. Includes desktop and mobile formats.",
-            "tagline": "60 illustrations · Desktop + mobile · Personal use",
+            "tagline": "60 illustrations \u00b7 Desktop + mobile \u00b7 Personal use",
             "media": [
                 {
-                    "src": "media/packs/Pack3.png",
+                    "src": "media/uploads/586dfa111283b94aacff14ae177c6f8d.png",
                     "alt": "Silver Pack image"
                 }
-            ]
+            ],
+            "active": true,
+            "payment_url": ""
         },
         "4": {
             "name": "Gold Pack",
@@ -34,13 +38,15 @@
             "sort_order": 4,
             "badge": "Extended",
             "description": "120 digital illustrations organised by theme, with desktop and mobile wallpapers. Includes a visual contact sheet to browse the collection.",
-            "tagline": "120 illustrations · Themed folders · Contact sheet",
+            "tagline": "120 illustrations \u00b7 Themed folders \u00b7 Contact sheet",
             "media": [
                 {
-                    "src": "media/packs/Pack4.png",
+                    "src": "media/uploads/a4f8e7377ff3959f4b3d50ecf3ca3a5b.png",
                     "alt": "Gold Pack image"
                 }
-            ]
+            ],
+            "active": true,
+            "payment_url": ""
         },
         "5": {
             "name": "Ruby Pack",
@@ -48,13 +54,15 @@
             "sort_order": 5,
             "badge": "Premium",
             "description": "250 digital illustrations across landscapes, flowers and experimental artwork. Includes colour variations and a visual index for easy browsing.",
-            "tagline": "250 illustrations · Colour variations · Visual index",
+            "tagline": "250 illustrations \u00b7 Colour variations \u00b7 Visual index",
             "media": [
                 {
-                    "src": "media/packs/Pack5.png",
+                    "src": "media/uploads/5db48c7ad5e1870eb9b0b99b9b920e0a.png",
                     "alt": "Ruby Pack image"
                 }
-            ]
+            ],
+            "active": true,
+            "payment_url": ""
         },
         "6": {
             "name": "Diamond Pack",
@@ -62,13 +70,15 @@
             "sort_order": 6,
             "badge": "Complete",
             "description": "500 digital illustrations in one curated archive. Includes all five smaller collections, desktop and mobile formats, and a complete visual index.",
-            "tagline": "500 illustrations · Complete archive · Personal use",
+            "tagline": "500 illustrations \u00b7 Complete archive \u00b7 Personal use",
             "media": [
                 {
-                    "src": "media/packs/Pack6.png",
+                    "src": "media/uploads/e156ee2e9455b89419eedd01476347ca.png",
                     "alt": "Diamond Pack image"
                 }
-            ]
+            ],
+            "active": true,
+            "payment_url": ""
         },
         "7": {
             "name": "Starter Pack",
@@ -76,16 +86,43 @@
             "sort_order": 1,
             "badge": "Discovery",
             "description": "12 digital illustrations in a colourful starter collection. PNG and JPG files for personal wallpapers and moodboards.",
-            "tagline": "12 illustrations · PNG + JPG · Personal use",
+            "tagline": "12 illustrations \u00b7 PNG + JPG \u00b7 Personal use",
             "media": [
                 {
-                    "src": "media/packs/Pack1.png",
+                    "src": "media/uploads/f100306e41d4770138078daddfc43c71.png",
                     "alt": "Starter Pack image"
                 }
-            ]
+            ],
+            "active": true,
+            "payment_url": ""
         }
     },
     "roulette": {
-        "media": []
+        "media": [
+            {
+                "src": "media/uploads/5db48c7ad5e1870eb9b0b99b9b920e0a.png",
+                "alt": "Roulette image"
+            },
+            {
+                "src": "media/uploads/586dfa111283b94aacff14ae177c6f8d.png",
+                "alt": "Roulette image"
+            },
+            {
+                "src": "media/uploads/a4f8e7377ff3959f4b3d50ecf3ca3a5b.png",
+                "alt": "Roulette image"
+            },
+            {
+                "src": "media/uploads/a19a2aa33d17fa638199db5e3b9b83c8.png",
+                "alt": "Roulette image"
+            },
+            {
+                "src": "media/uploads/e156ee2e9455b89419eedd01476347ca.png",
+                "alt": "Roulette image"
+            },
+            {
+                "src": "media/uploads/f100306e41d4770138078daddfc43c71.png",
+                "alt": "Roulette image"
+            }
+        ]
     }
 }

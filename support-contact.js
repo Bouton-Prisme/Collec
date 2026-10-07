@@ -15,6 +15,5 @@
       link.style.overflowWrap = 'anywhere';
       element.appendChild(link);
     });
-    document.querySelectorAll('[data-site-demo]').forEach(element => { element.hidden = settings.mode !== 'demo'; });
   } catch { /* Keep a readable page if settings cannot be loaded. */ }
 })();

@@ -19,7 +19,7 @@ if ($listener) {
         throw "Le port $port est utilise par un autre programme. Liberez ce port puis relancez."
     }
 } else {
-    $server = Start-Process -FilePath $phpPath -ArgumentList @('-S', "127.0.0.1:$port", '-t', ('"' + $siteRoot + '"')) -WorkingDirectory $siteRoot -WindowStyle Hidden -PassThru
+    $server = Start-Process -FilePath $phpPath -ArgumentList @('-d', 'upload_max_filesize=5M', '-d', 'post_max_size=8M', '-S', "127.0.0.1:$port", '-t', ('"' + $siteRoot + '"')) -WorkingDirectory $siteRoot -WindowStyle Hidden -PassThru
 }
 
 $ready = $false

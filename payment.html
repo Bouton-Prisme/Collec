@@ -49,159 +49,6 @@
     p{margin:0 0 16px}
     .muted{color:var(--muted)}
 
-    /* Montants */
-    .amounts{
-      display:grid;
-      grid-template-columns:repeat(auto-fit, minmax(170px, 1fr));
-      gap:10px;
-      margin:18px 0 10px;
-      color:inherit;
-    }
-
-    .amount{
-      position:relative;
-      display:flex;
-      flex-direction:column;
-      align-items:flex-start;
-      gap:10px;
-      border:1px solid var(--line);
-      border-radius:14px;
-      background:var(--bg2);
-      padding:16px 16px 56px;
-      min-height:150px;
-      cursor:pointer;
-      font-size:0.85rem;
-      line-height:1.35;
-      transition:transform .22s ease, border-color .22s ease, box-shadow .22s ease, background .22s ease;
-    }
-
-    .amount:hover{
-      transform:translateY(-2px);
-      border-color:rgba(110,231,255,.6);
-      box-shadow:0 12px 30px rgba(0,0,0,.25);
-    }
-
-    .amount[data-active="true"]{
-      border-color:var(--accent);
-
-      box-shadow:0 16px 40px rgba(0,0,0,.35);
-    }
-
-    .amount[data-dim="true"] {
-      background: rgba(187, 186, 212, 0.062);
-      border-color: rgba(255, 255, 255, 0);
-      transform: none;
-      box-shadow: none;
-    }
-
-    /* Diminuer l’opacité de tout le contenu sauf du CTA */
-    .amount[data-dim="true"] > *:not(.amount-cta) {
-      opacity: .5;
-    }
-
-    .amount[data-in-cart="true"]{
-      border-color:var(--accent2);
-    }
-
-
-    .amount-badge:empty{ display:none; }
-
-    .amount-top{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-      width:100%;
-    }
-
-    .amount-name{
-      font-size:.9rem;
-      font-weight:600;
-      padding:4px 10px;
-      border-radius:999px;
-      color:#fff;
-      background:rgba(167,139,250,.16);
-     ;
-    }
-
-    .amount-price{
-      font-size:.875rem;
-      font-weight:600;
-      background:rgba(110,231,255,.14);
-      color:var(--accent);
-      padding:6px 10px;
-      border-radius:999px;
-      white-space:nowrap;
-      min-width:fit-content;
-    }
-
-    .amount-desc{
-      margin:0;
-      font-size:.75rem;
-      line-height:1.5;
-      color:var(--muted);
-      text-align:left;
-    }
-
-    .amount-cta{
-      position: absolute;
-      top: 30%;
-      left: 34%;
-      display:inline-flex;
-      gap:6px;
-      padding:10px 10px;
-      border-radius:10px;
-      font-size:1rem;
-      font-weight:600;
-      color:rgb(255, 255, 255);
-      background-color:#12141a;
-      opacity:0;
-      transform:translateY(6px);
-      pointer-events:none;
-      transition:opacity .18s ease, transform .18s ease, background .18s ease;
-    }
-
-
-    .amount:hover .amount-cta,
-    .amount:focus-within .amount-cta{
-      opacity:1;
-      transform:translateY(0);
-    }
-
-    .amount[data-in-cart="true"] .amount-cta{
-      background:rgba(107, 255, 61, 0.22);
-      color:var(--muted);
-    }
-
-    .amount-cta-icon{
-      width:16px;
-      height:16px;
-      filter:drop-shadow(0 2px 4px rgba(0,0,0,.25));
-    }
-
-    .amount-cta-label{
-
-      width: 40px;
-      display:inline-flex;
-
-
-    }
-
-    .amount-cta-label:empty{
-      display:none;
-    }
-
-    .amount[data-in-cart="true"] .amount-cta-icon{
-      display:none;
-    }
-
-    .amount-cta.is-hidden{
-      display:none;
-    }
-
-    .row{display:flex;gap:10px;margin-top:10px}
-    .row select{flex:1;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--bg2);color:var(--text)}
-
     /* CTA */
     .cta{display:flex;gap:10px;align-items:center;margin-top:16px}
     .btn{border:1px solid transparent;color:#0b0c10;font-weight:700;padding:14px 18px;border-radius:12px;cursor:pointer;box-shadow:var(--shadow)}
@@ -253,216 +100,127 @@
 
 
   </style>
+  <link rel="stylesheet" href="payment.css">
+  <link rel="stylesheet" href="order.css">
+  <link rel="stylesheet" href="site-ui.css">
 </head>
 
-<body class="min-h-screen flex flex-col bg-white text-black transition-colors dark:bg-black dark:text-white">
-  <header>
-    <nav class="flex justify-between items-center px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
-      <div class="font-bold text-white text-lg"><a href="home.html" class="hover:underline">BitShop</a></div>
-      <div class="flex items-center gap-3">
-
-
-    <!-- Bouton Panier -->
-    <button id="cartBtn" type="button"
-      class="relative px-3 py-2 rounded-lg border border-white/30 hover:bg-white hover:text-black transition">
-      Cart
-      <span id="cartCount"
-        class="absolute -top-1 -right-1 text-[10px] leading-none px-1.5 py-0.5 rounded-full bg-cyan-950 text-cyan-400 font-bold">
-        0
-      </span>
-    </button>
-    <a href="home.html"
-      class="px-4 py-2 text-white border border-white rounded text-sm hover:bg-white hover:text-black inline-block">
-      Menu
-    </a>
-  </div>
-</nav>
+<body class="storefront min-h-screen flex flex-col transition-colors">
+  <header class="site-header">
+    <nav class="site-nav" aria-label="Main navigation">
+      <a class="site-brand" href="home.html">BitShop</a>
+      <div class="site-nav__actions"><button id="cartBtn" type="button"
+      class="cart-trigger ui-button" aria-expanded="false" aria-controls="cartPanel">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 3h2l3 12h10l3-9H6"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
+      Cart <span id="cartCount" class="cart-count">0</span>
+    </button><a class="ui-button" href="home.html">Products</a></div>
+    </nav>
   </header>
 
 
     <!-- Panneau Panier -->
-    <div id="cartPanel"
-        class="hidden fixed top-16 right-6 z-50 w-80 max-w-[90vw] rounded-xl border border-white/10 bg-gray-800 text-white shadow-2xl backdrop-blur-md">
-      <div class="p-3 border-b border-white/10 flex items-center justify-between">
-        <strong>Cart</strong>
-        <button id="cartClose" class="text-xs px-2 py-1 border border-white/20 rounded hover:bg-white hover:text-black">
-          🗙
-        </button>
-
+    <aside id="cartPanel" class="cart-panel hidden" aria-labelledby="cartHeading">
+      <div class="cart-header">
+        <div><span class="cart-eyebrow">YOUR SELECTION</span><h2 id="cartHeading">Cart</h2></div>
+        <button id="cartClose" type="button" class="cart-close" aria-label="Close cart">&times;</button>
       </div>
-      <div class="max-h-80 overflow-auto p-3">
-        <ul id="cartList" class="space-y-2 text-sm"></ul>
+      <ul id="cartList" class="cart-list"></ul>
+      <div class="cart-footer">
+        <div class="cart-total"><span>Total</span><strong id="cartTotal">0.00 USD</strong></div>
+        <a id="cartPay" href="#pay" class="cart-pay">Pay <span aria-hidden="true">&rarr;</span></a>
+        <a id="cartBrowse" href="home.html" class="cart-pay" hidden>Browse products <span aria-hidden="true">&rarr;</span></a>
       </div>
-      <div class="p-3 border-t border-white/10 flex items-center justify-between">
-        <a href="#pay"
-                    class="mt-2 px-4 py-2 font-bold rounded-lg
-                bg-cyan-950 text-white border border-sky-700
-                hover:opacity-90 transition">
-          Pay
-        </a>
-
-      </div>
-    </div>
+    </aside>
 
 
 
   <div class="wrap">
     <main class="card" aria-labelledby="title">
-      <h1 class="text-3xl sm:text-3xl font-bold" id="title">Payment</h1>
-      <p data-demo-notice class="mt-4 text-sm text-cyan-300">Demo only — sample wallet addresses and illustrative exchange rates. Do not send funds. No payment will be processed.</p>
+      <div class="checkout-heading">
+        <h1 id="title">Payment</h1>
+        <span class="checkout-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 4v3"/></svg>Crypto checkout</span>
+      </div>
+      <p class="checkout-intro">Choose your pack. Your order will be saved before you send any payment.</p>
       <p id="paymentAvailability" role="status" class="mt-4 text-sm text-amber-200"></p>
       <p id="paymentInstructions" class="mt-4 whitespace-pre-line text-sm text-gray-300"></p>
-      <p class="text-sm"><a id="paymentSupport" class="underline text-cyan-300" hidden>Contact support</a></p>
+      <p class="payment-support"><a id="paymentSupport" class="underline text-cyan-300" hidden>Contact support</a></p>
 
-      <div class="text white flex mt-12 font-bold items-center justify-between">
-        <h4>Products</h4>
-      </div>
-      <div class="amounts" role="radiogroup" aria-label="Select a pack" data-products-options>
-        <div class="amount" role="radio" aria-checked="false" tabindex="0" data-value="1">
-          <span class="amount-badge"></span>
-          <div class="amount-top">
-            <span class="amount-name">Product 1</span>
-            <span class="amount-price" aria-label="Price"></span>
-          </div>
-          <p class="amount-desc"></p>
-          <div class="amount-cta">
-            <span class="amount-cta-label ">Select</span>
-          </div>
-        </div>
-
-        <div class="amount" role="radio" aria-checked="false" tabindex="-1" data-value="2">
-          <span class="amount-badge"></span>
-          <div class="amount-top">
-            <span class="amount-name">Product 2</span>
-            <span class="amount-price" aria-label="Price"></span>
-          </div>
-          <p class="amount-desc"></p>
-          <div class="amount-cta">
-            <span class="amount-cta-label">Select</span>
-          </div>
-        </div>
-
-        <div class="amount" role="radio" aria-checked="false" tabindex="-1" data-value="3">
-          <span class="amount-badge"></span>
-          <div class="amount-top">
-            <span class="amount-name">Product 3</span>
-            <span class="amount-price" aria-label="Price"></span>
-          </div>
-          <p class="amount-desc"></p>
-          <div class="amount-cta">
-            <span class="amount-cta-label">Select</a>
-          </div>
-        </div>
-
-        <div class="amount" role="radio" aria-checked="false" tabindex="-1" data-value="4">
-          <span class="amount-badge"></span>
-          <div class="amount-top">
-            <span class="amount-name">Product 4</span>
-            <span class="amount-price" aria-label="Price"></span>
-          </div>
-          <p class="amount-desc"></p>
-          <div class="amount-cta">
-            <span class="amount-cta-label"></span>
-          </div>
-        </div>
-        <div class="amount" role="radio" aria-checked="false" tabindex="-1" data-value="5">
-          <span class="amount-badge"></span>
-          <div class="amount-top">
-            <span class="amount-name">Product 5</span>
-            <span class="amount-price" aria-label="Price"></span>
-          </div>
-          <p class="amount-desc"></p>
-          <div class="amount-cta">
-            <span class="amount-cta-label">Select</span>
-          </div>
-        </div>
-        <div class="amount" role="radio" aria-checked="false" tabindex="-1" data-value="6">
-          <span class="amount-badge"></span>
-          <div class="amount-top">
-            <span class="amount-name">Product 6</span>
-            <span class="amount-price" aria-label="Price"></span>
-          </div>
-          <p class="amount-desc"></p>
-          <div class="amount-cta">
-            <span class="amount-cta-label">Select</span>
-          </div>
-        </div>
-      </div>
-      <div id="pay" class="text white mt-12 font-bold"><h4>Payment type</h4></div>
-      <div class="row max-w-32 max-h-24">
-        <select id="currency" class="ml-4" aria-label="Crypto"></select>
-      </div>
-
-
-
+      <h2 class="checkout-step" id="products-heading"><span aria-hidden="true">1</span>Select your product</h2>
+      <div class="amounts" role="radiogroup" aria-labelledby="products-heading" data-products-options><p role="status">Loading packs...</p></div>
+      <section id="pay" class="payment-stage" aria-labelledby="currency-heading" tabindex="-1">
+      <h2 id="currency-heading" class="checkout-step"><span aria-hidden="true">2</span>Choose your cryptocurrency</h2>
+      <p class="payment-stage-intro">Choose the network you use in your wallet. The next page provides your exact amount and a private order tracking link.</p>
+      <select id="currency" aria-label="Crypto" hidden></select>
+      <fieldset class="currency-options" id="currencyOptions" aria-labelledby="currency-heading"></fieldset>
+      <h2 id="payment-heading" class="checkout-step"><span aria-hidden="true">3</span>Review and create your order</h2>
 
       <!-- Panneau Paiement -->
-      <div id="paybox" class="paybox mt-12 ml-4" aria-live="polite">
+      <div id="paybox" class="paybox" aria-live="polite">
         <div class="paybox-head">
           <strong id="payTitle">Pay with BTC</strong>
-          <span id="payAmount" class="amt">�</span>
+          <span id="payAmount" class="amt">&mdash;</span>
         </div>
         <p id="paymentNetwork" class="text-sm text-cyan-300"></p>
         <p id="rateStatus" class="text-sm text-gray-400"></p>
-        <button id="refreshQuote" type="button" hidden class="rounded border border-white/30 px-3 py-2">Refresh amount</button>
-        <div id="paymentDetails">
-        <div class=" text-center mt-12"><a>Please scan the qrcode</a></div>
+        <button id="refreshQuote" type="button" hidden class="ui-button">Refresh amount</button>
+        <div id="paymentDetails" hidden>
+        <div class="payment-qr"><p>Scan the QR code</p>
 
 
         <!-- ? Conteneur QR (la lib injecte le canvas dedans) -->
-        <div id="payQR" class="qr mt-8"></div>
+        <div id="payQR" class="qr"></div></div>
 
-        <div class=" text-center mt-8"><a>Or copy the address and amount</a></div>
+        <div class="payment-copy"><p>Or copy the address and amount</p>
         <!-- Address -->
         <div class="addr-wrap">
           <div class="label">Address</div>
-          <button id="copyAddr" class="copy bg-gradient-to-r from-sky-500 to-cyan-950 hover:opacity-90 transition" type="button" title="Copy address"></button>
+          <button id="copyAddr" class="copy hover:opacity-90 transition" type="button" title="Copy address"></button>
           <div id="copyAddrStatus" class="copy-status" aria-live="polite" aria-atomic="true">Address copied.</div>
         </div>
 
         <!-- Amount -->
         <div class="addr-wrap">
           <div class="label" id="labelAmt">Amount</div>
-          <button id="copyAmt" class="copy bg-gradient-to-r from-sky-500 to-cyan-950 hover:opacity-90 transition" type="button" title="Copy amount"></button>
+          <button id="copyAmt" class="copy hover:opacity-90 transition" type="button" title="Copy amount"></button>
           <div id="copyAmtStatus" class="copy-status" aria-live="polite" aria-atomic="true">Amount copied.</div>
         </div>
 
-        <div class="ttl small">Expires in <span id="ttl">�</span></div>
+        <div class="ttl small">Expires in <span id="ttl">&mdash;</span></div>
+        </div>
         </div>
       </div>
 
-      <div class="mt-12 flex justify-between">
-        <a href="home.html"
-          class="mt-2 px-4 py-2 text-white font-bold rounded-lg
-                background-repeat
-                hover:opacity-90 transition">
-          &#11013; Back
-        </a>
-        <a id="proofLink" href="TYP.html"
-          class="mt-2 px-4 py-2 text-white font-bold rounded-lg
-                bg-cyan-950 text-white border border-sky-700
-                hover:opacity-90 transition">
-          Once paid &#10132;
-        </a>
+      </section>
+
+      <div class="checkout-contact" id="checkout-contact" hidden>
+        <label for="checkout-email">Contact email</label>
+        <input id="checkout-email" type="email" autocomplete="email" required maxlength="254" placeholder="you@example.com">
+        <p id="checkout-delay">Payment is checked manually. Keep your private tracking link to follow your order.</p>
+        <p>No automatic email is sent. Creating an order does not charge your wallet.</p>
+        <p id="checkout-error" role="alert"></p>
+      </div>
+      <div class="checkout-actions">
+        <a href="home.html">&larr; Back to products</a>
+        <a id="proofLink" href="TYP.html">Once paid &rarr;</a>
       </div>
 
     </main>
 
-    <section class="mt-32 px-4 py-16 text-center">
+    <section class="why-crypto px-4 text-center">
       <h2 class="text-3xl font-bold">Why crypto?</h2>
       <div class="mt-8 max-w-3xl mx-auto flex flex-wrap justify-center gap-2">
         <span class="px-3 py-1 rounded-full border border-gray-300 dark:border-gray-700 text-sm">Reduced fees</span>
-        <span class="px-3 py-1 rounded-full border border-gray-300 dark:border-gray-700 text-sm">Minutes to confirm</span>
-        <span class="px-3 py-1 rounded-full border border-gray-300 dark:border-gray-700 text-sm">No chargebacks</span>
+        <span class="px-3 py-1 rounded-full border border-gray-300 dark:border-gray-700 text-sm">Manual payment review</span>
+        <span class="px-3 py-1 rounded-full border border-gray-300 dark:border-gray-700 text-sm">Clear order status</span>
         <span class="px-3 py-1 rounded-full border border-gray-300 dark:border-gray-700 text-sm">No bank data shared</span>
-        <span class="px-3 py-1 rounded-full border border-gray-300 dark:border-gray-700 text-sm">Verifiable receipts</span>
+        <span class="px-3 py-1 rounded-full border border-gray-300 dark:border-gray-700 text-sm">Private order tracking</span>
         <span class="px-3 py-1 rounded-full border border-gray-300 dark:border-gray-700 text-sm">Full privacy option (XMR)</span>
       </div>
     </section>
   </div>
 
   <footer class="flex flex-col sm:flex-row justify-between text-xs text-gray-400 dark:text-gray-500 px-6 py-8 border-t border-gray-200 dark:border-gray-700">
-    <div>� 2025 BitShop</div>
+    <div>&copy; 2025 BitShop</div>
     <div class="flex gap-6 mt-2 sm:mt-0">
       <a href="support.html">Support</a>
       <a href="privacy.html">Privacy</a>
@@ -485,7 +243,7 @@
       if (!response.ok) throw new Error('Catalogue unavailable');
       const config = await response.json();
       if (config.products && typeof config.products === 'object') {
-        PRODUCTS = config.products;
+        PRODUCTS = Object.fromEntries(Object.entries(config.products).filter(([, product]) => product.active !== false));
       }
     } catch (error) {
       console.warn('Could not load products.json.', error);
@@ -509,11 +267,48 @@
   const ADDRESSES = Object.fromEntries(activeAssets.map(symbol => [symbol, paymentSettings.assets[symbol].address]));
   const INVOICE_MINUTES = paymentSettings.invoice_minutes;
   const currencySelect = document.getElementById('currency');
+  const assetPresentation = {
+    BTC: { name: 'Bitcoin', icon: '<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="20" fill="#f7931a"/><text x="20" y="29" text-anchor="middle" fill="white" font-family="Arial,sans-serif" font-size="29" font-weight="bold" transform="rotate(12 20 20)">₿</text></svg>' },
+    ETH: { name: 'Ethereum', icon: '<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="20" fill="#6278be"/><path d="m20 5-10 16 10 6 10-6Z" fill="#fff"/><path d="M20 5v22l10-6Z" fill="#bcc9ef"/><path d="m10 24 10 12 10-12-10 6Z" fill="#fff"/><path d="M20 30v6l10-12Z" fill="#bcc9ef"/></svg>' },
+    XMR: { name: 'Monero', icon: '<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="20" fill="#f26822"/><path d="M1 26h7V13l12 12 12-12v13h7a20 20 0 0 1-38 0" fill="#fff"/><path d="M3 30h9V23l8 8 8-8v7h9a20 20 0 0 1-34 0" fill="#4c4c4c"/></svg>' }
+  };
+  const currencyOptions = document.getElementById('currencyOptions');
+  currencyOptions.disabled = !paymentSettings.enabled;
   activeAssets.forEach(symbol => {
     const option = document.createElement('option');
     option.value = symbol;
     option.textContent = symbol;
     currencySelect.appendChild(option);
+    const presentation = assetPresentation[symbol] || { name: symbol, icon: '' };
+    const label = document.createElement('label');
+    label.className = 'currency-option';
+    const input = document.createElement('input');
+    input.type = 'radio';
+    input.name = 'payment-currency';
+    input.value = symbol;
+    input.checked = symbol === paymentSettings.default_asset;
+    const tile = document.createElement('span');
+    tile.className = 'currency-tile';
+    tile.innerHTML = presentation.icon;
+    const details = document.createElement('span');
+    const name = document.createElement('strong');
+    name.textContent = presentation.name;
+    const network = document.createElement('small');
+    network.textContent = symbol;
+    const networkName = document.createElement('span');
+    networkName.className = 'currency-network';
+    networkName.textContent = ` · ${paymentSettings.assets[symbol].network}`;
+    network.append(networkName);
+    label.title = paymentSettings.assets[symbol].network;
+    details.append(name, network);
+    tile.append(details);
+    label.append(input, tile);
+    currencyOptions.append(label);
+    input.addEventListener('change', () => {
+      if (!input.checked) return;
+      currencySelect.value = symbol;
+      currencySelect.dispatchEvent(new Event('change'));
+    });
   });
   currencySelect.value = paymentSettings.default_asset;
   document.getElementById('paymentInstructions').textContent = paymentSettings.instructions;
@@ -522,9 +317,9 @@
     support.href = 'mailto:' + paymentSettings.support_email;
     support.hidden = false;
   }
-  document.querySelector('[data-demo-notice]').hidden = !demoMode;
-  if (demoMode) document.getElementById('proofLink').textContent = 'Continue demo →';
-  else document.getElementById('proofLink').textContent = 'Submit payment reference →';
+  document.getElementById('proofLink').textContent = demoMode ? 'Create demo order →' : 'Create order & view payment →';
+  document.getElementById('checkout-delay').textContent = demoMode ? 'Demo only: do not send crypto. Test orders are saved for preview.' : paymentSettings.processing_message;
+  document.getElementById('paymentInstructions').textContent = '';
   if (!paymentSettings.enabled || !activeAssets.length) {
     document.getElementById('paymentAvailability').textContent = 'Payments are temporarily unavailable. Please contact support.';
     document.getElementById('paybox').hidden = true;
@@ -557,42 +352,31 @@
   const productOptions = document.querySelector('[data-products-options]');
 
   if (productOptions) {
-    productOptions.innerHTML = productEntries.map(([id, product], index) => `
-      <div class="amount" role="radio" aria-checked="false" tabindex="${index === 0 ? '0' : '-1'}" data-value="${escapeHTML(id)}">
-        <span class="amount-badge"></span>
-        <div class="amount-top">
-          <span class="amount-name">${escapeHTML(product.name || `Product ${id}`)}</span>
-          <span class="amount-price" aria-label="Price"></span>
+    productOptions.innerHTML = productEntries.map(([id, product], index) => {
+      const media = (product.media || []).find(item => item.src && !/\.(mp4|webm|ogg)(?:[?#]|$)/i.test(item.src));
+      const price = typeof product.usd === 'number' ? `$${product.usd}` : '—';
+      return `
+      <div class="amount" role="radio" aria-checked="false" tabindex="${index === 0 ? '0' : '-1'}" data-value="${escapeHTML(id)}" aria-label="${escapeHTML(product.name)}, ${escapeHTML(price)}">
+        <div class="amount-media">
+          ${media ? `<img src="${escapeHTML(media.src)}" alt="" loading="lazy">` : ''}
+          <span class="amount-badge">${escapeHTML(product.badge || '')}</span>
+          <span class="amount-check" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 8 3 3 7-7"/></svg></span>
         </div>
-        <p class="amount-desc"></p>
-        <div class="amount-cta">
-          <span class="amount-cta-label">Select</span>
+        <div class="amount-body">
+          <div class="amount-top">
+            <span class="amount-name">${escapeHTML(product.name || `Product ${id}`)}</span>
+            <span class="amount-price">${escapeHTML(price)}</span>
+          </div>
+          <p class="amount-desc">${escapeHTML(product.tagline || '')}</p>
         </div>
-      </div>
-    `).join('');
+      </div>`;
+    }).join('');
+    productOptions.querySelectorAll('img').forEach(image => {
+      image.addEventListener('error', () => { image.hidden = true; });
+    });
   }
 
   const amountBtns = [...document.querySelectorAll('.amount')];
-  // Injecte les infos produit dans la carte
-  amountBtns.forEach(btn => {
-    const id = String(btn.dataset.value);
-    const p = PRODUCTS[id];
-    if (!p) return;
-    const price = (typeof p.usd === 'number') ? `$${p.usd}` : '';
-    if (price) btn.setAttribute('data-price', price);
-    const nameEl = btn.querySelector('.amount-name');
-    if (nameEl && p.name) nameEl.textContent = p.name;
-    const priceEl = btn.querySelector('.amount-price');
-    if (priceEl) priceEl.textContent = price || '-';
-    const descEl = btn.querySelector('.amount-desc');
-    if (descEl) descEl.textContent = p.tagline || '';
-    const badgeEl = btn.querySelector('.amount-badge');
-    if (badgeEl) badgeEl.textContent = p.badge || '';
-    const cta = btn.querySelector('.amount-cta');
-    if (cta) cta.classList.remove('is-hidden');
-    const ctaLabel = btn.querySelector('.amount-cta-label');
-    if (ctaLabel) ctaLabel.textContent = "Select";
-  });
 
   const select = document.getElementById('currency');
 
@@ -771,11 +555,12 @@
 
   /* ---------- S�lection pack ---------- */
   function selectPack(v){
+    productOptions.classList.toggle('has-selection', amountBtns.some(b => b.dataset.value === String(v)));
     amountBtns.forEach(b => {
       const isActive = b.dataset.value === String(v);
       b.dataset.active = isActive ? 'true' : 'false';
       b.setAttribute('aria-checked', isActive ? 'true' : 'false');
-      b.setAttribute('tabindex', isActive ? '0' : '-1');
+      b.setAttribute('tabindex', isActive || (!v && b === amountBtns[0]) ? '0' : '-1');
     });
     const btn = amountBtns.find(b => b.dataset.value === String(v));
     if (btn) {
@@ -794,6 +579,14 @@
       activate();
     });
     card.addEventListener('keydown', evt => {
+      if (['ArrowRight', 'ArrowDown', 'ArrowLeft', 'ArrowUp', 'Home', 'End'].includes(evt.key)) {
+        evt.preventDefault();
+        const index = amountBtns.indexOf(card);
+        const next = evt.key === 'Home' ? 0 : evt.key === 'End' ? amountBtns.length - 1 :
+          (index + (['ArrowRight', 'ArrowDown'].includes(evt.key) ? 1 : -1) + amountBtns.length) % amountBtns.length;
+        amountBtns[next].focus();
+        amountBtns[next].click();
+      }
       if (evt.key === 'Enter' || evt.key === ' ') {
         evt.preventDefault();
         activate();
@@ -804,6 +597,7 @@
 
 
   select.value = state.asset;
+  document.querySelectorAll('[name="payment-currency"]').forEach(input => { input.checked = input.value === state.asset; });
   /* ---------- UI Panier ---------- */
   const cartBtn   = document.getElementById('cartBtn');
   const cartCountEl = document.getElementById('cartCount');
@@ -811,6 +605,7 @@
   const cartList  = document.getElementById('cartList');
   const cartClearBtn = document.getElementById('cartClear');
   const cartCloseBtn = document.getElementById('cartClose');
+  const cartPay = document.getElementById('cartPay');
 
   function renderCartBadge(){
     if (!cartCountEl) return;
@@ -823,21 +618,26 @@
     if (!cartList) return;
     const items = getCart();
     cartList.innerHTML = '';
+    const total = items.reduce((sum, item) => sum + Number(PRODUCTS[item.id]?.usd || 0) * item.qty, 0);
+    document.getElementById('cartTotal').textContent = `${total.toFixed(2)} USD`;
+    cartPay.hidden = !items.length;
+    document.getElementById('cartBrowse').hidden = !!items.length;
     if (!items.length){
-      cartList.innerHTML = '<li class="text-gray-400">Your cart is empty.</li>';
+      cartList.innerHTML = '<li class="cart-empty">Your cart is empty. Choose a pack to get started.</li>';
       return;
     }
     for (const it of items){
       const p = PRODUCTS[it.id] || { name:`Product ${it.id}`, usd: 0 };
       const li = document.createElement('li');
-      li.className = 'flex items-center justify-between gap-2';
+      li.className = 'cart-item';
+      const media = (p.media || []).find(item => item.src && !/\.(mp4|webm|ogg)(?:[?#]|$)/i.test(item.src));
       li.innerHTML = `
-        <div>
-          <div class="font-semibold">${escapeHTML(p.name)}</div>
-          <div class="text-xs text-gray-400">Qty: ${escapeHTML(it.qty)} - ${escapeHTML(p.usd)} USD</div>
+        ${media ? `<img class="cart-thumbnail" src="${escapeHTML(media.src)}" alt="">` : ''}
+        <div class="cart-item-info">
+          <strong>${escapeHTML(p.name)}</strong>
+          <span>Qty: ${escapeHTML(it.qty)} &middot; ${Number(p.usd).toFixed(2)} USD</span>
+          <button type="button" class="cart-remove" data-remove="${escapeHTML(it.id)}">Remove</button>
         </div>
-        <button class="text-xs px-2 py-1 border border-white/20 rounded hover:bg-white hover:text-black"
-                data-remove="${escapeHTML(it.id)}">Remove</button>
       `;
       cartList.appendChild(li);
     }
@@ -851,11 +651,39 @@
     if (!cartPanel) return;
     const want = (typeof show === 'boolean') ? show : cartPanel.classList.contains('hidden');
     cartPanel.classList.toggle('hidden', !want);
+    cartBtn.setAttribute('aria-expanded', String(want));
   }
 
   if (cartBtn) cartBtn.addEventListener('click', ()=> toggleCartPanel());
-  if (cartCloseBtn) cartCloseBtn.addEventListener('click', ()=> toggleCartPanel(false));
+  if (cartCloseBtn) cartCloseBtn.addEventListener('click', () => { toggleCartPanel(false); cartBtn.focus(); });
   if (cartClearBtn) cartClearBtn.addEventListener('click', ()=> clearCart());
+  document.addEventListener('click', event => {
+    const path = event.composedPath();
+    if (!path.includes(cartPanel) && !path.includes(cartBtn)) toggleCartPanel(false);
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && !cartPanel.classList.contains('hidden')) {
+      toggleCartPanel(false);
+      cartBtn.focus();
+    }
+  });
+
+  function scrollToPayment() {
+    if (!getCart().length) return;
+    const stage = document.getElementById('pay').getBoundingClientRect();
+    const header = document.querySelector('.site-header').getBoundingClientRect();
+    const offset = header.height + 20;
+    window.scrollTo({ top: Math.max(0, window.scrollY + stage.top - offset),
+      behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+  }
+  cartPay.addEventListener('click', event => {
+    event.preventDefault();
+    toggleCartPanel(false);
+    if (location.hash !== '#pay') history.pushState(null, '', '#pay');
+    document.getElementById('pay').focus({ preventScroll: true });
+    scrollToPayment();
+  });
+  window.addEventListener('hashchange', () => { if (location.hash === '#pay') scrollToPayment(); });
   // 3) Si l'URL fournit un produit, l'Select (apr?s l'init UI)
 
   // Initialise the cart only after rates and expiry state have been defined.
@@ -867,139 +695,74 @@
   renderCartBadge();
   renderCartPanel();
 
-  select.addEventListener('change', () => { state.asset = select.value; updateUI(); });
-
-  /* ---------- Taux USD (fallback inclus) ---------- */
-  let rates = Object.fromEntries(activeAssets.map(symbol => [symbol, paymentSettings.assets[symbol].manual_rate]));
-  let ratesReady = demoMode || paymentSettings.rate_source === 'manual';
-  async function loadRates(){
-    if (demoMode || paymentSettings.rate_source === 'manual') { updateUI(); return; }
-    ratesReady = false;
+  select.addEventListener('change', () => {
+    state.asset = select.value;
+    document.querySelectorAll('[name="payment-currency"]').forEach(input => { input.checked = input.value === state.asset; });
     updateUI();
-    try {
-      const ids = activeAssets.map(symbol => paymentSettings.assets[symbol].rate_id).join(',');
-      const r = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(ids)}&vs_currencies=usd`, { cache:'no-store', signal: AbortSignal.timeout(6000) });
-      if (r.ok) {
-        const j = await r.json();
-        const next = Object.fromEntries(activeAssets.map(symbol => [symbol, j[paymentSettings.assets[symbol].rate_id]?.usd]));
-        if (Object.values(next).every(rate => Number.isFinite(rate) && rate > 0)) { rates = next; ratesReady = true; }
-      }
-    } catch(e) { /* A real payment never falls back to a demo rate. */ }
-    updateUI();
-  }
-
-  /* ---------- Helpers ---------- */
-  function fmtCoin(symbol, amt){
-    const d = symbol === 'BTC' ? 8 : symbol === 'XMR' ? 12 : 18;
-    return Number(amt).toFixed(d).replace(/0+$/,'').replace(/\.$/,'');
-  }
-  function makeURI(symbol, addr, amount){
-    if(symbol==='BTC') return `bitcoin:${addr}?amount=${amount}`;
-    if(symbol==='ETH'){ const [whole, fraction = ''] = amount.split('.'); const wei = BigInt(whole + fraction.padEnd(18, '0')).toString(); return `ethereum:${addr}@1?value=${wei}`; }
-    if(symbol==='XMR') return `monero:${addr}?tx_amount=${amount}`;
-    return addr;
-  }
-  function setCopy(button, statusEl, text){
-    button.textContent = text;
-    button.onclick = async () => {
-      try {
-        await navigator.clipboard.writeText(text);
-        statusEl.textContent = 'Copied.';
-        button.dataset.copied = "1";
-        statusEl.classList.add("show");
-        setTimeout(()=>{ button.dataset.copied="0"; statusEl.classList.remove("show"); }, 1200);
-      } catch {
-        statusEl.textContent = 'Copy failed. Select and copy the text manually.';
-        statusEl.classList.add('show');
-      }
-    };
-  }
-
-  /* ---------- UI Update ---------- */
-  let endAt = Date.now() + INVOICE_MINUTES*60*1000;
-  document.getElementById('refreshQuote').addEventListener('click', async () => {
-    endAt = Date.now() + INVOICE_MINUTES*60*1000;
-    const button = document.getElementById('refreshQuote');
-    button.disabled = true;
-    await loadRates();
-    button.disabled = false;
   });
-  async function updateUI(){
-    const cartItems = getCart();
-    const cartItem = cartItems[0];
-    const packForPaybox = cartItem?.id;
-    amountBtns.forEach(btn => {
-      const isCartItem = !!cartItem && btn.dataset.value === cartItem.id;
-      const shouldDim = !!cartItem && !isCartItem;
-      btn.dataset.inCart = isCartItem ? 'true' : 'false';
-      btn.dataset.dim = shouldDim ? 'true' : 'false';
-      const cta = btn.querySelector('.amount-cta');
-      if (cta) cta.classList.toggle('is-hidden', isCartItem);
-      const ctaLabel = btn.querySelector('.amount-cta-label');
-      if (ctaLabel) {
-        if (isCartItem) {
-          ctaLabel.textContent = '';
-        } else {
-          ctaLabel.innerHTML = '<img src="addamount.png" alt="">';
-        }
-      }
-    });
-    const hasProduct = !!cartItem && !!PRODUCTS[packForPaybox];
-    document.getElementById('paybox').hidden = !hasProduct;
-    document.getElementById('proofLink').hidden = !hasProduct;
-    if (!hasProduct) { sessionStorage.removeItem('bitshop.checkout'); return; }
-    const product = PRODUCTS[packForPaybox];
-    const qty = cartItem?.qty ?? 1;
-    const symbol = state.asset;
-    const usdPerUnit = Number(product?.usd ?? 0);
-    const totalUsd = usdPerUnit * qty;
-    const expired = Date.now() >= endAt;
-    document.getElementById('paymentDetails').hidden = !ratesReady || expired;
-    document.getElementById('refreshQuote').hidden = ratesReady && !expired;
-    document.getElementById('paymentNetwork').textContent = paymentSettings.assets[symbol].network;
-    document.getElementById('rateStatus').textContent = demoMode ? 'Illustrative demo rate' : paymentSettings.rate_source === 'manual' ? 'Fixed rate set by the shop' : 'Exchange rate from CoinGecko';
-    if (!ratesReady || expired) {
-      payTitle.textContent = expired ? 'This amount has expired. Refresh to continue.' : 'Exchange rates unavailable. Please refresh the amount.';
-      payAmount.textContent = '';
-      document.getElementById('proofLink').hidden = true;
-      sessionStorage.removeItem('bitshop.checkout');
-      return;
-    }
-    const usdPerCoin = rates[symbol];
-    const rawCoin = totalUsd / usdPerCoin;
-    const safeRawCoin = Number.isFinite(rawCoin) ? rawCoin : 0;
-    const coinAmt = fmtCoin(symbol, safeRawCoin);
-    const addr = ADDRESSES[symbol];
-    const displayName = product?.name || 'Selected product';
-    const titleName = qty > 1 ? `${displayName} x${qty}` : displayName;
-    payTitle.textContent = `Pay ${titleName} (${symbol})`;
-    payAmount.textContent = `${coinAmt} ${symbol} / ${totalUsd.toFixed(2)} USD`;
-    if (labelAmt) labelAmt.textContent = `Amount ${symbol}`;
-    setCopy(copyAddrBtn, copyAddrStatus, addr);
-    setCopy(copyAmtBtn,  copyAmtStatus,  `${coinAmt}`);
-    sessionStorage.setItem('bitshop.checkout', JSON.stringify({ id: packForPaybox, qty, asset: symbol, coinAmount: coinAmt, totalUsd, address: addr, settingsRevision: paymentSettings.revision, expiresAt: endAt }));
-    const proofUrl = new URL('TYP.html', location.href);
-    proofUrl.searchParams.set('value', packForPaybox);
-    proofUrl.searchParams.set('asset', symbol);
-    document.getElementById('proofLink').href = proofUrl.pathname + proofUrl.search;
-    const uri = makeURI(symbol, addr, coinAmt);
-    if (qrBox && window.QRCode) {
-      qrBox.innerHTML = '';
-      new QRCode(qrBox, { text: uri, width: 192, height: 192, correctLevel: QRCode.CorrectLevel.M });
-    }
-  }
 
-  /* ---------- TTL ---------- */
-  function tickTTL(){
-    const left = Math.max(0, endAt - Date.now());
-    const m = Math.floor(left/60000), s = Math.floor((left%60000)/1000);
-    ttlSpan.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-    if (left === 0 && !document.getElementById('paymentDetails').hidden) updateUI();
+  // The server creates and prices the order before any address is displayed.
+  function updateUI() {
+    const item = getCart()[0];
+    selectPack(item?.id);
+    const product = item && PRODUCTS[item.id];
+    document.getElementById('paybox').hidden = !product;
+    document.getElementById('proofLink').hidden = !product;
+    document.getElementById('checkout-contact').hidden = !product;
+    document.getElementById('paymentDetails').hidden = true;
+    document.getElementById('refreshQuote').hidden = true;
+    if (!product) return;
+    payTitle.textContent = `${product.name}${item.qty > 1 ? ` × ${item.qty}` : ''}`;
+    payAmount.textContent = `${(Number(product.usd) * item.qty).toFixed(2)} USD`;
+    document.getElementById('paymentNetwork').textContent = paymentSettings.assets[state.asset].network;
+    document.getElementById('rateStatus').textContent = 'Your exact crypto amount is calculated when your order is saved.';
+    document.getElementById('proofLink').href = '#checkout-contact';
   }
+  let creatingOrder = false;
+  let requestId = null;
+  let requestSelection = null;
+  document.getElementById('proofLink').addEventListener('click', async event => {
+    event.preventDefault();
+    if (creatingOrder) return;
+    const email = document.getElementById('checkout-email');
+    if (!email.reportValidity()) return;
+    const item = getCart()[0];
+    if (!item) return;
+    const selection = JSON.stringify([item.id, item.qty, state.asset, email.value.trim()]);
+    if (selection !== requestSelection) {
+      requestId = Array.from(crypto.getRandomValues(new Uint8Array(16)), x => x.toString(16).padStart(2, '0')).join('');
+      requestSelection = selection;
+    }
+    const link = event.currentTarget;
+    const label = link.textContent;
+    const errorBox = document.getElementById('checkout-error');
+    creatingOrder = true; link.setAttribute('aria-disabled', 'true'); link.textContent = 'Saving your order…'; errorBox.textContent = '';
+    try {
+      const session = await fetch('checkout.php', { cache: 'no-store' });
+      if (!session.ok) throw new Error('Checkout unavailable. Please try again.');
+      const { csrf } = await session.json();
+      const body = new URLSearchParams({ csrf, request_id: requestId, product_id: item.id, qty: item.qty, asset: state.asset, email: email.value.trim() });
+      const response = await fetch('checkout.php', { method: 'POST', body });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Could not save your order.');
+      location.assign(result.url);
+    } catch (error) {
+      errorBox.textContent = error.message || 'Connection interrupted. Please retry; your order will not be duplicated.';
+      link.textContent = label; creatingOrder = false; link.removeAttribute('aria-disabled');
+    }
+  });
   if (fromQueryPack) setSingleCart(fromQueryPack);
   else updateUI();
-  loadRates();
-  tickTTL(); setInterval(tickTTL, 1000);
+
+  if (fromQueryPack || (location.hash === '#pay' && getCart().length)) {
+    if (!location.hash) history.replaceState(null, '', `${location.pathname}${location.search}#pay`);
+    const scrollWhenReady = async () => {
+      await document.fonts.ready;
+      requestAnimationFrame(() => requestAnimationFrame(scrollToPayment));
+    };
+    if (document.readyState === 'complete') scrollWhenReady();
+    else window.addEventListener('load', scrollWhenReady, { once: true });
+  }
 
   /* ---------- Copy payment link (optionnel) ---------- */
   if (copyLinkBtn){

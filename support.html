@@ -5,19 +5,26 @@
   <title>Support - BitShop</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="site-ui.css">
 </head>
-<body class="bg-black text-white p-8">
-  <a href="home.html" class="inline-block mb-8 underline">← Back to catalogue</a>
-  <p data-site-demo class="mb-6 text-sm text-cyan-300">Demonstration site — sample catalogue, no real orders.</p>
+<body class="storefront info-page">
+  <header class="site-header">
+    <nav class="site-nav" aria-label="Main navigation">
+      <a class="site-brand" href="home.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="m12 3 9 5v8l-9 5-9-5V8zM3 8l9 5 9-5M12 13v8M7.5 5.5l9 5"/></svg>BitShop</a>
+      <div class="site-nav__actions"><a class="ui-button" href="home.html">Products</a><a class="ui-button" href="roulette.html">Roulette</a></div>
+    </nav>
+  </header>
+  <main class="info-card">
   <h1 class="text-3xl font-bold mb-6">Support</h1>
   <p class="mb-4">If you have any issue with your order or payment, please contact us at:</p>
   <p class="font-mono mb-6"><span data-support-email>Loading support contact?</span></p>
   <ul class="list-disc ml-6 space-y-2">
-    <li>Always include your <b>transaction ID</b> (TXID) or a screenshot of the payment.</li>
+    <li>Include your <b>order number</b> and transaction ID (TXID). Keep your private tracking link confidential.</li>
     <li>Specify the product you purchased.</li>
     <li>We reply within 24 hours, usually faster.</li>
   </ul>
   <p class="mt-8 text-sm text-gray-400">No accounts, no tracking. For security reasons, we never ask for personal data.</p>
+  </main>
 <script src="support-contact.js"></script>
 </body>
 </html>
